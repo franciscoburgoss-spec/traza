@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoria - TRAZA{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Auditoria</h1>
+            <p class="text-sm text-slate-500 mt-1">Registro completo de actividades del sistema</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="traza-card mb-6">
+        <form class="flex flex-wrap items-end gap-3"
+            hx-get="/auditoria"
+            hx-target="#auditoria-table-container"
+            hx-trigger="change, submit"
+            hx-indicator="#audit-spinner">
+            <div class="flex-1 min-w-[160px]">
+                <label for="filtro-entidad" class="traza-label">Entidad</label>
+                <select id="filtro-entidad" name="entidad" class="traza-select">
+                    <option value="">Todas</option>
+                    <option value="Proyecto">Proyecto</option>
+                    <option value="Documento">Documento</option>
+                    <option value="Evidencia">Evidencia</option>
+                    <option value="Verificacion">Verificacion</option>
+                    <option value="Dictamen">Dictamen</option>
+                    <option value="HAB">HAB</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[160px]">
+                <label for="filtro-accion" class="traza-label">Accion</label>
+                <select id="filtro-accion" name="accion" class="traza-select">
+                    <option value="">Todas</option>
+                    <option value="CREATE">Crear</option>
+                    <option value="UPDATE">Actualizar</option>
+                    <option value="DELETE">Eliminar</option>
+                    <option value="EXTRACT">Extraer</option>
+                    <option value="VERIFY">Verificar</option>
+                    <option value="GENERATE">Generar</option>
+                    <option value="APPROVE">Aprobar</option>
+                    <option value="REJECT">Rechazar</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[160px]">
+                <label for="filtro-session" class="traza-label">Session ID</label>
+                <input type="text" id="filtro-session" name="session_id"
+                    placeholder="Buscar por session..."
+                    class="traza-input">
+            </div>
+            <button type="submit" class="traza-btn-primary self-end mb-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div id="auditoria-table-container" class="traza-card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="traza-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Entidad</th>
+                        <th scope="col">Accion</th>
+                        <th scope="col">Detalle</th>
+                        <th scope="col">Session ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if logs %}
+                        {% for log in logs %}
+                        <tr>
+                            <td class="text-xs text-slate-500 whitespace-nowrap">
+                                {{ log.fecha.strftime('%d/%m/%Y %H:%M:%S') if log.fecha else '-' }}
+                            </td>
+                            <td>
+                                <span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                                    {{ log.entidad }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if log.accion == 'CREATE' %}
+                                    <span class="badge" style="background:#d1fae5;color:#065f46;border-color:#a7f3d0;">CREAR</span>
+                                {% elif log.accion == 'UPDATE' %}
+                                    <span class="badge" style="background:#dbeafe;color:#1e40af;border-color:#93c5fd;">ACTUALIZAR</span>
+                                {% elif log.accion == 'DELETE' %}
+                                    <span class="badge" style="background:#fee2e2;color:#991b1b;border-color:#fca5a5;">ELIMINAR</span>
+                                {% elif log.accion == 'EXTRACT' %}
+                                    <span class="badge" style="background:#fef3c7;color:#92400e;border-color:#fcd34d;">EXTRAER</span>
+                                {% elif log.accion == 'VERIFY' %}
+                                    <span class="badge badge-cumple">VERIFICAR</span>
+                                {% elif log.accion == 'GENERATE' %}
+                                    <span class="badge" style="background:#e0e7ff;color:#3730a3;border-color:#c7d2fe;">GENERAR</span>
+                                {% elif log.accion == 'APPROVE' %}
+                                    <span class="badge badge-cumple">APROBAR</span>
+                                {% elif log.accion == 'REJECT' %}
+                                    <span class="badge badge-no-cumple">RECHAZAR</span>
+                                {% else %}
+                                    <span class="badge badge-pendiente">{{ log.accion }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-xs text-slate-600 max-w-xs truncate">
+                                {{ log.detalle or '-' }}
+                            </td>
+                            <td>
+                                {% if log.session_id %}
+                                    <span class="font-mono text-xs text-slate-500" title="{{ log.session_id }}">
+                                        {{ log.session_id[:8] }}...
+                                    </span>
+                                {% else %}
+                                    <span class="text-xs text-slate-400">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-10 text-slate-400">
+                                <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-sm">No hay registros de auditoria</p>
+                                <p class="text-xs mt-1">Los logs se generan automaticamente con cada operacion</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_paginas and total_paginas > 1 %}
+        <div class="flex items-center justify-between px-4 py-3 border-t border-slate-200">
+            <p class="text-xs text-slate-500">
+                Mostrando pagina {{ pagina_actual }} de {{ total_paginas }}
+            </p>
+            <div class="flex items-center gap-1">
+                {% if pagina_actual > 1 %}
+                    <button class="traza-btn traza-btn-secondary traza-btn-sm"
+                        hx-get="/auditoria?pagina={{ pagina_actual - 1 }}&entidad={{ entidad_filtro or '' }}&accion={{ accion_filtro or '' }}"
+                        hx-target="#auditoria-table-container"
+                        hx-swap="innerHTML">
+                        Anterior
+                    </button>
+                {% endif %}
+                {% if pagina_actual < total_paginas %}
+                    <button class="traza-btn traza-btn-secondary traza-btn-sm"
+                        hx-get="/auditoria?pagina={{ pagina_actual + 1 }}&entidad={{ entidad_filtro or '' }}&accion={{ accion_filtro or '' }}"
+                        hx-target="#auditoria-table-container"
+                        hx-swap="innerHTML">
+                        Siguiente
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Loading indicator -->
+        <div id="audit-spinner" class="htmx-indicator absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
+            <svg class="spinner w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

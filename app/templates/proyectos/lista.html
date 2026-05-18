@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Proyectos - TRAZA{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Proyectos</h1>
+            <p class="text-sm text-slate-500 mt-1">Gestion y evaluacion de proyectos de infraestructura</p>
+        </div>
+        <a href="/proyectos/nuevo" class="traza-btn-primary self-start sm:self-auto"
+            hx-boost="true" hx-target="#main-content" hx-swap="innerHTML">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nuevo Proyecto
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="traza-card mb-6">
+        <div class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-[180px]">
+                <label for="filtro-estado" class="traza-label">Estado</label>
+                <select id="filtro-estado" name="estado"
+                    class="traza-select"
+                    hx-get="/proyectos"
+                    hx-target="#proyectos-table-container"
+                    hx-trigger="change"
+                    hx-indicator="#filtro-spinner">
+                    <option value="">Todos los estados</option>
+                    <option value="ACTIVO">Activo</option>
+                    <option value="EN_EVALUACION">En Evaluacion</option>
+                    <option value="EVALUADO">Evaluado</option>
+                    <option value="CERRADO">Cerrado</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[180px]">
+                <label for="filtro-tipo" class="traza-label">Tipo</label>
+                <select id="filtro-tipo" name="tipo"
+                    class="traza-select"
+                    hx-get="/proyectos"
+                    hx-target="#proyectos-table-container"
+                    hx-trigger="change">
+                    <option value="">Todos los tipos</option>
+                    <option value="Megaproyecto">Megaproyecto</option>
+                    <option value="CNT">CNT</option>
+                    <option value="CSP">CSP</option>
+                    <option value="DP">DP</option>
+                    <option value="PC">PC</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2 mb-0.5">
+                <span id="filtro-spinner" class="htmx-indicator">
+                    <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                </span>
+                <span class="text-xs text-slate-400" id="total-proyectos">
+                    {% if proyectos %}{{ proyectos|length }} proyecto(s){% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div id="proyectos-table-container" class="traza-card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="traza-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Codigo</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Zona Sismica</th>
+                        <th scope="col">Score</th>
+                        <th scope="col" class="text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if proyectos %}
+                        {% for p in proyectos %}
+                        <tr class="group"
+                            hx-get="/proyectos/{{ p.id }}"
+                            hx-target="#main-content"
+                            hx-swap="innerHTML"
+                            hx-trigger="click"
+                            hx-push-url="true"
+                            style="cursor: pointer;">
+                            <td class="font-mono text-xs font-semibold text-slate-600">{{ p.codigo }}</td>
+                            <td class="font-medium text-slate-800 group-hover:text-emerald-700 transition-colors">
+                                {{ p.nombre }}
+                            </td>
+                            <td>
+                                <span class="text-xs text-slate-500">{{ p.tipo_proyecto }}</span>
+                            </td>
+                            <td>
+                                {% if p.estado == 'ACTIVO' %}
+                                    <span class="badge badge-activo">Activo</span>
+                                {% elif p.estado == 'EN_EVALUACION' %}
+                                    <span class="badge badge-en-evaluacion">En Evaluacion</span>
+                                {% elif p.estado == 'EVALUADO' %}
+                                    <span class="badge badge-evaluado">Evaluado</span>
+                                {% elif p.estado == 'CERRADO' %}
+                                    <span class="badge badge-cerrado">Cerrado</span>
+                                {% else %}
+                                    <span class="badge badge-cerrado">{{ p.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <span class="font-mono text-xs font-semibold text-slate-600">
+                                    Z{{ p.ref_zona_sismica or '-' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if p.score is not none %}
+                                    <div class="flex items-center gap-2">
+                                        <div class="score-bar-container w-16">
+                                            <div class="score-bar-fill score-bar-{% if p.score >= 80 %}green{% elif p.score >= 50 %}yellow{% else %}red{% endif %}"
+                                                style="width: {{ p.score }}%;"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-600">{{ "%.1f"|format(p.score) }}%</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-xs text-slate-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                <button class="traza-btn traza-btn-secondary traza-btn-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                    hx-get="/proyectos/{{ p.id }}/editar"
+                                    hx-target="#main-content"
+                                    hx-swap="innerHTML"
+                                    hx-trigger="click"
+                                    hx-push-url="true"
+                                    onclick="event.stopPropagation();">
+                                    Editar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-10 text-slate-400">
+                                <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                <p class="text-sm">No hay proyectos registrados</p>
+                                <a href="/proyectos/nuevo" class="traza-btn-primary traza-btn-sm mt-3 inline-flex"
+                                    hx-boost="true" hx-target="#main-content" hx-swap="innerHTML">
+                                    Crear el primero
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,313 @@
+/* ===========================================
+   TRAZA - Custom CSS (complemento a Tailwind)
+   =========================================== */
+
+/* --- Badges de Estado --- */
+.badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+}
+
+.badge-activo {
+    @apply bg-emerald-100 text-emerald-700 border border-emerald-200;
+}
+.badge-en-evaluacion {
+    @apply bg-amber-100 text-amber-700 border border-amber-200;
+}
+.badge-evaluado {
+    @apply bg-blue-100 text-blue-700 border border-blue-200;
+}
+.badge-cerrado {
+    @apply bg-slate-100 text-slate-600 border border-slate-200;
+}
+
+/* Badges Extraccion */
+.badge-pendiente {
+    @apply bg-slate-100 text-slate-600 border border-slate-200;
+}
+.badge-extraido {
+    @apply bg-emerald-100 text-emerald-700 border border-emerald-200;
+}
+.badge-error {
+    @apply bg-red-100 text-red-700 border border-red-200;
+}
+
+/* Badges Verificacion */
+.badge-cumple {
+    @apply bg-emerald-100 text-emerald-700 border border-emerald-200;
+}
+.badge-no-cumple {
+    @apply bg-red-100 text-red-700 border border-red-200;
+}
+.badge-no-aplica {
+    @apply bg-slate-100 text-slate-500 border border-slate-200;
+}
+
+/* --- Score Bar --- */
+.score-bar-container {
+    @apply w-full bg-slate-200 rounded-full h-3 overflow-hidden;
+}
+.score-bar-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+}
+.score-bar-green {
+    @apply bg-emerald-500;
+}
+.score-bar-yellow {
+    @apply bg-amber-500;
+}
+.score-bar-red {
+    @apply bg-red-500;
+}
+
+/* Score Circle */
+.score-circle {
+    @apply relative flex items-center justify-center rounded-full;
+}
+.score-circle-text {
+    @apply text-3xl font-bold;
+}
+.score-excelente { @apply text-emerald-600; }
+.score-bueno      { @apply text-blue-600; }
+.score-regular    { @apply text-amber-600; }
+.score-deficiente { @apply text-red-600; }
+
+/* --- Tab system --- */
+.tab-active {
+    @apply border-b-2 border-emerald-500 text-emerald-700 font-semibold;
+}
+.tab-inactive {
+    @apply text-slate-500 hover:text-slate-700 hover:border-slate-300;
+}
+
+/* --- Tables --- */
+.traza-table {
+    @apply min-w-full divide-y divide-slate-200;
+}
+.traza-table thead {
+    @apply bg-slate-50;
+}
+.traza-table th {
+    @apply px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider;
+}
+.traza-table tbody {
+    @apply bg-white divide-y divide-slate-200;
+}
+.traza-table td {
+    @apply px-4 py-3 whitespace-nowrap text-sm text-slate-700;
+}
+.traza-table tr {
+    @apply hover:bg-slate-50 transition-colors cursor-pointer;
+}
+
+/* --- Cards --- */
+.traza-card {
+    @apply bg-white rounded-lg shadow-sm border border-slate-200 p-5;
+}
+.traza-card-header {
+    @apply flex items-center justify-between mb-4 pb-3 border-b border-slate-100;
+}
+
+/* --- Forms --- */
+.traza-label {
+    @apply block text-sm font-medium text-slate-700 mb-1;
+}
+.traza-input {
+    @apply w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm
+           text-sm text-slate-800 placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
+           transition-all duration-150;
+}
+.traza-input:disabled {
+    @apply bg-slate-100 text-slate-500 cursor-not-allowed;
+}
+.traza-select {
+    @apply w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm
+           text-sm text-slate-800 bg-white
+           focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
+           transition-all duration-150;
+}
+.traza-textarea {
+    @apply w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm
+           text-sm text-slate-800 placeholder-slate-400 resize-y
+           focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
+           transition-all duration-150;
+}
+.traza-btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium
+           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1;
+}
+.traza-btn-primary {
+    @apply traza-btn bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500
+           shadow-sm;
+}
+.traza-btn-secondary {
+    @apply traza-btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50
+           focus:ring-slate-400 shadow-sm;
+}
+.traza-btn-danger {
+    @apply traza-btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm;
+}
+.traza-btn-warning {
+    @apply traza-btn bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500 shadow-sm;
+}
+.traza-btn-sm {
+    @apply px-3 py-1.5 text-xs;
+}
+
+/* --- Confidence Colors --- */
+.confidence-high {
+    @apply text-emerald-600 font-semibold;
+}
+.confidence-medium {
+    @apply text-amber-600 font-semibold;
+}
+.confidence-low {
+    @apply text-red-600 font-semibold;
+}
+
+/* --- HAB Report Styles --- */
+.hab-report {
+    @apply bg-white border border-slate-300 rounded-lg p-8 max-w-4xl mx-auto;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.hab-report-header {
+    @apply text-center border-b-2 border-slate-800 pb-4 mb-6;
+}
+.hab-report-header h1 {
+    @apply text-2xl font-bold text-slate-900 uppercase tracking-wide;
+}
+.hab-report-header h2 {
+    @apply text-lg font-semibold text-slate-600 mt-1;
+}
+.hab-section {
+    @apply mb-6;
+}
+.hab-section-title {
+    @apply text-sm font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-1 mb-3;
+}
+.hab-data-row {
+    @apply flex justify-between py-1.5 border-b border-slate-100 text-sm;
+}
+.hab-data-label {
+    @apply font-medium text-slate-600;
+}
+.hab-data-value {
+    @apply text-slate-800 font-semibold;
+}
+.hab-compliance-row {
+    @apply flex items-center gap-3 py-2 border-b border-slate-100;
+}
+.hab-check-icon {
+    @apply w-5 h-5 text-emerald-500 flex-shrink-0;
+}
+.hab-cross-icon {
+    @apply w-5 h-5 text-red-500 flex-shrink-0;
+}
+
+/* --- Toast Notifications --- */
+.toast {
+    @apply flex items-start gap-3 p-4 rounded-lg shadow-lg border text-sm max-w-sm;
+    animation: toastIn 0.3s ease-out;
+}
+.toast-success {
+    @apply bg-emerald-50 border-emerald-200 text-emerald-800;
+}
+.toast-error {
+    @apply bg-red-50 border-red-200 text-red-800;
+}
+.toast-warning {
+    @apply bg-amber-50 border-amber-200 text-amber-800;
+}
+.toast-info {
+    @apply bg-blue-50 border-blue-200 text-blue-800;
+}
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(100%); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(100%); }
+}
+.toast.hiding {
+    animation: toastOut 0.3s ease-in forwards;
+}
+
+/* --- Loading / HTMX indicators --- */
+.htmx-indicator {
+    @apply hidden;
+}
+.htmx-request .htmx-indicator {
+    @apply inline-flex;
+}
+.htmx-request.htmx-indicator {
+    @apply inline-flex;
+}
+.spinner {
+    @apply animate-spin h-4 w-4 text-emerald-600;
+}
+
+/* --- Print Styles for HAB Export --- */
+@media print {
+    nav, aside, .no-print, #notifications-container {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+    }
+    #main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+    .hab-report {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: none !important;
+        page-break-inside: avoid;
+    }
+    .hab-section {
+        page-break-inside: avoid;
+    }
+}
+
+/* --- Responsive tweaks --- */
+@media (max-width: 640px) {
+    .traza-table {
+        @apply text-xs;
+    }
+    .traza-table th,
+    .traza-table td {
+        @apply px-2 py-2;
+    }
+    .score-circle-text {
+        @apply text-2xl;
+    }
+    .hab-report {
+        @apply p-4;
+    }
+    .hab-report-header h1 {
+        @apply text-lg;
+    }
+}
+
+/* --- Focus visible for accessibility --- */
+*:focus-visible {
+    @apply outline-none ring-2 ring-emerald-500 ring-offset-1;
+}
+
+/* --- Scrollbar styling --- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

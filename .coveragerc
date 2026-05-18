@@ -1,0 +1,8 @@
+[run]
+source = app
+omit = app/templates/*, app/static/*
+
+[report]
+fail_under = 30
+show_missing = True
+skip_covered = False

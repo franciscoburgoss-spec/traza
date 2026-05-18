@@ -1,0 +1,142 @@
+{# Formulario de datos tecnicos para muro de contencion #}
+{# Puede usarse como partial dentro de una modal o como pagina completa #}
+
+{% if full_page %}{% extends "base.html" %}{% endif %}
+
+{% if full_page %}{% block content %}{% endif %}
+
+<div class="{% if full_page %}max-w-3xl mx-auto{% endif %}">
+    {% if full_page %}
+    <div class="flex items-center gap-3 mb-6">
+        <button class="traza-btn-secondary traza-btn-sm"
+            hx-get="/proyectos/{{ proyecto_id }}"
+            hx-target="#main-content"
+            hx-swap="innerHTML">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Datos Tecnicos - Muro de Contencion</h1>
+            <p class="text-sm text-slate-500">Complete los parametros para generar el HAB</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-slate-800">Muro de Contencion</h3>
+        <button type="button"
+            onclick="document.getElementById('modal-backdrop').classList.add('hidden'); document.getElementById('modal-container').innerHTML = '';"
+            class="text-slate-400 hover:text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="traza-card">
+        <form id="muro-form"
+            hx-post="/hab/muro"
+            hx-target="{% if full_page %}#main-content{% else %}#modal-container{% endif %}"
+            hx-swap="{% if full_page %}innerHTML{% else %}innerHTML{% endif %}"
+            hx-indicator="#muro-spinner"
+            class="space-y-4">
+
+            <input type="hidden" name="proyecto_id" value="{{ proyecto_id }}">
+
+            <!-- Tipo de Muro -->
+            <div>
+                <label for="tipo_muro" class="traza-label">Tipo de Muro <span class="text-red-500">*</span></label>
+                <select id="tipo_muro" name="tipo_muro" required class="traza-select">
+                    <option value="">Seleccione...</option>
+                    <option value="gravedad">Gravedad</option>
+                    <option value="cantilever">Cantilever</option>
+                    <option value="contafuerte">Contafuerte</option>
+                    <option value="mecanicamente_estabilizado">Mecanicamente Estabilizado (MSE)</option>
+                    <option value="gabion">Gavion</option>
+                    <option value="pilote">Pilote</option>
+                </select>
+            </div>
+
+            <!-- Dimensiones -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label for="altura_m" class="traza-label">Altura (m) <span class="text-red-500">*</span></label>
+                    <input type="number" id="altura_m" name="altura_m" step="0.01" min="0.5" max="50" required
+                        class="traza-input" placeholder="Ej: 3.50">
+                </div>
+                <div>
+                    <label for="longitud_m" class="traza-label">Longitud (m) <span class="text-red-500">*</span></label>
+                    <input type="number" id="longitud_m" name="longitud_m" step="0.01" min="0.1" max="10000" required
+                        class="traza-input" placeholder="Ej: 125.00">
+                </div>
+                <div>
+                    <label for="espesor_m" class="traza-label">Espesor (m)</label>
+                    <input type="number" id="espesor_m" name="espesor_m" step="0.01" min="0.1" max="10"
+                        class="traza-input" placeholder="Ej: 0.40">
+                </div>
+            </div>
+
+            <!-- Propiedades Materiales -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="fc_MPa" class="traza-label">Resistencia del Concreto f'c (MPa)</label>
+                    <input type="number" id="fc_MPa" name="fc_MPa" step="0.1" min="10" max="100"
+                        class="traza-input" placeholder="Ej: 25.0">
+                    <p class="text-xs text-slate-400 mt-1">Rango tipico: 20-50 MPa</p>
+                </div>
+                <div>
+                    <label for="tipo_drenaje" class="traza-label">Tipo de Drenaje</label>
+                    <select id="tipo_drenaje" name="tipo_drenaje" class="traza-select">
+                        <option value="">Seleccione...</option>
+                        <option value="subdren">Subdren</option>
+                        <option value="tuberia_perforada">Tuberia Perforada</option>
+                        <option value="geodren">Geodren</option>
+                        <option value="sin_drenaje">Sin Drenaje</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Factor de Seguridad -->
+            <div>
+                <label for="factor_seguridad" class="traza-label">Factor de Seguridad Minimo</label>
+                <input type="number" id="factor_seguridad" name="factor_seguridad" step="0.01" min="1.0" max="5.0"
+                    class="traza-input" placeholder="Ej: 1.50" value="1.50">
+                <p class="text-xs text-slate-400 mt-1">Minimo 1.3 para estabilidad, 1.5 recomendado</p>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button type="button" class="traza-btn-secondary"
+                    {% if full_page %}
+                    hx-get="/proyectos/{{ proyecto_id }}"
+                    hx-target="#main-content"
+                    hx-swap="innerHTML"
+                    {% else %}
+                    onclick="document.getElementById('modal-backdrop').classList.add('hidden'); document.getElementById('modal-container').innerHTML = '';"
+                    {% endif %}>
+                    Cancelar
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="muro-spinner" class="htmx-indicator flex items-center gap-2 text-sm text-slate-500">
+                        <svg class="spinner w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Generando...
+                    </span>
+                    <button type="submit" class="traza-btn-primary">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Generar HAB
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% if full_page %}{% endblock %}{% endif %}

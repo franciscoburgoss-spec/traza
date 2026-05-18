@@ -1,0 +1,120 @@
+{# Template parcial para lista de documentos de un proyecto #}
+{# Se renderiza dentro del tab de proyecto #}
+
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+    <div>
+        <h2 class="text-lg font-semibold text-slate-800">Documentos del Proyecto</h2>
+        <p class="text-sm text-slate-500">Documentos tecnicos registrados y su estado de extraccion</p>
+    </div>
+    <button class="traza-btn-primary self-start"
+        hx-get="/proyectos/{{ proyecto_id }}/documentos/nuevo"
+        hx-target="#modal-container"
+        hx-swap="innerHTML"
+        onclick="document.getElementById('modal-backdrop').classList.remove('hidden')">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Registrar Documento
+    </button>
+</div>
+
+<div class="traza-card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="traza-table">
+            <thead>
+                <tr>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Estado Extraccion</th>
+                    <th scope="col">Fecha Registro</th>
+                    <th scope="col" class="text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if documentos %}
+                    {% for d in documentos %}
+                    <tr class="group">
+                        <td class="font-medium text-slate-800">
+                            <svg class="w-4 h-4 inline mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            {{ d.nombre }}
+                        </td>
+                        <td>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{{ d.tipo }}</span>
+                        </td>
+                        <td>
+                            {% if d.estado_extraccion == 'PENDIENTE' %}
+                                <span class="badge badge-pendiente">Pendiente</span>
+                            {% elif d.estado_extraccion == 'EXTRAIDO' %}
+                                <span class="badge badge-extraido">Extraido</span>
+                            {% elif d.estado_extraccion == 'ERROR' %}
+                                <span class="badge badge-error">Error</span>
+                            {% else %}
+                                <span class="badge badge-pendiente">{{ d.estado_extraccion }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-xs text-slate-500">
+                            {{ d.fecha_registro.strftime('%d/%m/%Y %H:%M') if d.fecha_registro else '-' }}
+                        </td>
+                        <td class="text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                {% if d.estado_extraccion == 'PENDIENTE' %}
+                                    <button class="traza-btn traza-btn-primary traza-btn-sm"
+                                        hx-post="/documentos/{{ d.id }}/extraer"
+                                        hx-target="closest tr"
+                                        hx-swap="outerHTML"
+                                        hx-confirm="Extraer evidencias de '{{ d.nombre }}'?"
+                                        title="Extraer Evidencias">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
+                                    </button>
+                                {% endif %}
+                                <button class="traza-btn traza-btn-secondary traza-btn-sm"
+                                    title="Ver detalle"
+                                    hx-get="/documentos/{{ d.id }}"
+                                    hx-target="#modal-container"
+                                    hx-swap="innerHTML"
+                                    onclick="document.getElementById('modal-backdrop').classList.remove('hidden')">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-10 text-slate-400">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <p class="text-sm">No hay documentos registrados</p>
+                            <button class="traza-btn-primary traza-btn-sm mt-3"
+                                hx-get="/proyectos/{{ proyecto_id }}/documentos/nuevo"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML"
+                                onclick="document.getElementById('modal-backdrop').classList.remove('hidden')">
+                                Registrar el primero
+                            </button>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modal-backdrop" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    onclick="if(event.target === this) { this.classList.add('hidden'); document.getElementById('modal-container').innerHTML = ''; }">
+    <div id="modal-container" class="w-full max-w-lg" onclick="event.stopPropagation();"></div>
+</div>

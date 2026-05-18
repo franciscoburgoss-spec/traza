@@ -1,0 +1,117 @@
+{# Template parcial para lista de evidencias de un proyecto #}
+
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+    <div>
+        <h2 class="text-lg font-semibold text-slate-800">Evidencias Extraidas</h2>
+        <p class="text-sm text-slate-500">
+            {% if evidencias %}
+                {{ evidencias|length }} evidencia(s) registrada(s)
+                {% if validadas is defined %} - {{ validadas }} validada(s){% endif %}
+            {% else %}
+                Datos tecnicos extraidos de documentos
+            {% endif %}
+        </p>
+    </div>
+    <button class="traza-btn-primary self-start"
+        hx-get="/proyectos/{{ proyecto_id }}/evidencias/nueva"
+        hx-target="#modal-container-ev"
+        hx-swap="innerHTML"
+        onclick="document.getElementById('modal-backdrop-ev').classList.remove('hidden')">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Agregar Manual
+    </button>
+</div>
+
+<div class="traza-card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="traza-table">
+            <thead>
+                <tr>
+                    <th scope="col">Campo</th>
+                    <th scope="col">Valor</th>
+                    <th scope="col">Unidad</th>
+                    <th scope="col">Extractor</th>
+                    <th scope="col">Confianza</th>
+                    <th scope="col">Validada</th>
+                    <th scope="col" class="text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if evidencias %}
+                    {% for e in evidencias %}
+                    <tr class="group">
+                        <td class="font-medium text-slate-800 text-xs">{{ e.campo }}</td>
+                        <td class="font-mono text-xs">{{ e.valor }}</td>
+                        <td class="text-xs text-slate-500">{{ e.unidad or '-' }}</td>
+                        <td>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                                {{ e.extractor or 'manual' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if e.confidence is not none %}
+                                <span class="text-xs font-semibold
+                                    {% if e.confidence > 0.8 %}confidence-high
+                                    {% elif e.confidence >= 0.5 %}confidence-medium
+                                    {% else %}confidence-low{% endif %}">
+                                    {{ "%.0f"|format(e.confidence * 100) }}%
+                                </span>
+                            {% else %}
+                                <span class="text-xs text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox"
+                                    class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500"
+                                    {% if e.validada %}checked{% endif %}
+                                    hx-patch="/evidencias/{{ e.id }}/validar"
+                                    hx-trigger="change"
+                                    hx-target="closest tr"
+                                    hx-swap="outerHTML"
+                                    hx-vals='{"validada": {{ "true" if not e.validada else "false" }}}'>
+                                <span class="ml-1.5 text-xs {% if e.validada %}text-emerald-600 font-medium{% else %}text-slate-400{% endif %}">
+                                    {{ "Si" if e.validada else "No" }}
+                                </span>
+                            </label>
+                        </td>
+                        <td class="text-right">
+                            <button class="traza-btn traza-btn-secondary traza-btn-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                hx-get="/evidencias/{{ e.id }}/editar"
+                                hx-target="#modal-container-ev"
+                                hx-swap="innerHTML"
+                                onclick="document.getElementById('modal-backdrop-ev').classList.remove('hidden')">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-10 text-slate-400">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <p class="text-sm">No hay evidencias registradas</p>
+                            <p class="text-xs mt-1 max-w-sm mx-auto">
+                                Extraiga evidencias desde la pestana Documentos o agreguelas manualmente.
+                            </p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modal-backdrop-ev" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    onclick="if(event.target === this) { this.classList.add('hidden'); document.getElementById('modal-container-ev').innerHTML = ''; }">
+    <div id="modal-container-ev" class="w-full max-w-lg" onclick="event.stopPropagation();"></div>
+</div>

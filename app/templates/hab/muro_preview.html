@@ -1,0 +1,214 @@
+{# Preview del HAB de Muro de Contencion #}
+{# Renderiza un reporte tecnico profesional #}
+
+{% if full_page %}{% extends "base.html" %}{% endif %}
+
+{% if full_page %}{% block content %}{% endif %}
+
+<div class="max-w-5xl mx-auto">
+    {% if full_page %}
+    <div class="flex items-center gap-3 mb-6 no-print">
+        <button class="traza-btn-secondary traza-btn-sm"
+            hx-get="/proyectos/{{ proyecto_id }}"
+            hx-target="#main-content"
+            hx-swap="innerHTML">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <div class="flex-1">
+            <h1 class="text-2xl font-bold text-slate-800">HAB - Muro de Contencion</h1>
+            <p class="text-sm text-slate-500">Hoja de Analisis de Buenas Practicas</p>
+        </div>
+        <div class="flex items-center gap-2 no-print">
+            <button onclick="window.print()" class="traza-btn-secondary traza-btn-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Imprimir
+            </button>
+            <a href="/hab/muro/{{ hab_id }}/pdf" class="traza-btn-primary traza-btn-sm" target="_blank">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                PDF
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Reporte HAB -->
+    <div class="hab-report" id="hab-report-content">
+
+        <!-- Header del Reporte -->
+        <div class="hab-report-header">
+            <h1>Hoja de Analisis de Buenas Practicas</h1>
+            <h2>Muro de Contencion - {{ datos.tipo_muro|replace('_', ' ')|title }}</h2>
+            <p class="text-sm text-slate-500 mt-2">
+                Proyecto: {{ proyecto_codigo or 'N/A' }} |
+                Fecha: {{ fecha_generacion or 'N/A' }} |
+                ID: {{ hab_id or 'N/A' }}
+            </p>
+        </div>
+
+        <!-- 1. Datos Generales -->
+        <div class="hab-section">
+            <h3 class="hab-section-title">1. Datos Generales</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Tipo de Muro</span>
+                    <span class="hab-data-value">{{ datos.tipo_muro|replace('_', ' ')|title }}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Altura</span>
+                    <span class="hab-data-value">{{ datos.altura_m }} m</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Longitud</span>
+                    <span class="hab-data-value">{{ datos.longitud_m }} m</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Espesor</span>
+                    <span class="hab-data-value">{{ datos.espesor_m or 'No especificado' }} {% if datos.espesor_m %}m{% endif %}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Resistencia Concreto f'c</span>
+                    <span class="hab-data-value">{{ datos.fc_MPa or 'No especificado' }} {% if datos.fc_MPa %}MPa{% endif %}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Tipo de Drenaje</span>
+                    <span class="hab-data-value">{{ datos.tipo_drenaje|replace('_', ' ')|title if datos.tipo_drenaje else 'No especificado' }}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Factor de Seguridad Requerido</span>
+                    <span class="hab-data-value">{{ datos.factor_seguridad or '1.50' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Verificaciones Técnicas -->
+        <div class="hab-section">
+            <h3 class="hab-section-title">2. Verificaciones Técnicas</h3>
+
+            <!-- Estabilidad al Vuelco -->
+            <div class="hab-compliance-row">
+                {% if resultados and resultados.estabilidad_vuelco >= (datos.factor_seguridad|float) %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Estabilidad al Vuelco</p>
+                        <p class="text-xs text-slate-500">FS = {{ "%.2f"|format(resultados.estabilidad_vuelco) }} >= {{ datos.factor_seguridad }}</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Estabilidad al Vuelco - NO CUMPLE</p>
+                        <p class="text-xs text-red-500">
+                            FS = {{ "%.2f"|format(resultados.estabilidad_vuelco) if resultados else 'N/A' }} < {{ datos.factor_seguridad }}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Estabilidad al Deslizamiento -->
+            <div class="hab-compliance-row">
+                {% if resultados and resultados.estabilidad_deslizamiento >= (datos.factor_seguridad|float) %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Estabilidad al Deslizamiento</p>
+                        <p class="text-xs text-slate-500">FS = {{ "%.2f"|format(resultados.estabilidad_deslizamiento) }} >= {{ datos.factor_seguridad }}</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Estabilidad al Deslizamiento - NO CUMPLE</p>
+                        <p class="text-xs text-red-500">
+                            FS = {{ "%.2f"|format(resultados.estabilidad_deslizamiento) if resultados else 'N/A' }} < {{ datos.factor_seguridad }}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Capacidad Portante -->
+            <div class="hab-compliance-row">
+                {% if resultados and resultados.capacidad_portante %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Capacidad Portante del Suelo</p>
+                        <p class="text-xs text-slate-500">qadm = {{ "%.2f"|format(resultados.capacidad_portante) }} kPa</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Capacidad Portante - NO CUMPLE</p>
+                        <p class="text-xs text-red-500">Presion de contacto excede la capacidad admisible</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Drenaje -->
+            <div class="hab-compliance-row">
+                {% if datos.tipo_drenaje and datos.tipo_drenaje != 'sin_drenaje' %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Sistema de Drenaje</p>
+                        <p class="text-xs text-slate-500">{{ datos.tipo_drenaje|replace('_', ' ')|title }} - Instalado</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Sistema de Drenaje - NO CUMPLE</p>
+                        <p class="text-xs text-red-500">No se especifica sistema de drenaje</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 3. Conclusion -->
+        <div class="hab-section">
+            <h3 class="hab-section-title">3. Conclusion y Recomendaciones</h3>
+            <div class="bg-slate-50 p-4 rounded-lg text-sm text-slate-700 leading-relaxed">
+                {% if resultados and resultados.conclusion %}
+                    {{ resultados.conclusion }}
+                {% else %}
+                    <p>El analisis del muro de contencion tipo <strong>{{ datos.tipo_muro|replace('_', ' ')|title }}</strong>
+                    con una altura de {{ datos.altura_m }} m y longitud de {{ datos.longitud_m }} m
+                    debe completarse con los calculos de estabilidad segun las normas vigentes.</p>
+                    <p class="mt-2">Se recomienda verificar:</p>
+                    <ul class="list-disc ml-5 mt-1 space-y-0.5">
+                        <li>Estabilidad externa (vuelco, deslizamiento, capacidad portante)</li>
+                        <li>Estabilidad interna (tensiones, esfuerzos)</li>
+                        <li>Drenaje y filtracion</li>
+                        <li>Sismicidad segun zona {{ zona_sismica or 'N/A' }}</li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 pt-4 border-t border-slate-200 text-center text-xs text-slate-400">
+            <p>TRAZA - Sistema de Evaluacion Tecnica de Proyectos de Infraestructura</p>
+            <p class="mt-1">Documento generado automaticamente - Session: {{ session_id or 'N/A' }}</p>
+        </div>
+
+    </div>
+</div>
+
+{% if full_page %}{% endblock %}{% endif %}

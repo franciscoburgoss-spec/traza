@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}{{ proyecto.codigo }} - TRAZA{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+        <div class="flex items-start gap-3">
+            <button class="traza-btn-secondary traza-btn-sm mt-1"
+                hx-get="/proyectos"
+                hx-target="#main-content"
+                hx-swap="innerHTML"
+                hx-push-url="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="text-2xl font-bold text-slate-800">{{ proyecto.nombre }}</h1>
+                    {% if proyecto.estado == 'ACTIVO' %}
+                        <span class="badge badge-activo">Activo</span>
+                    {% elif proyecto.estado == 'EN_EVALUACION' %}
+                        <span class="badge badge-en-evaluacion">En Evaluacion</span>
+                    {% elif proyecto.estado == 'EVALUADO' %}
+                        <span class="badge badge-evaluado">Evaluado</span>
+                    {% elif proyecto.estado == 'CERRADO' %}
+                        <span class="badge badge-cerrado">Cerrado</span>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-3 mt-1 text-sm text-slate-500 flex-wrap">
+                    <span class="font-mono">{{ proyecto.codigo }}</span>
+                    <span>|</span>
+                    <span>{{ proyecto.tipo_proyecto }}</span>
+                    <span>|</span>
+                    <span>Zona Sismica: <strong class="text-slate-700">{{ proyecto.ref_zona_sismica }}</strong></span>
+                    <span>|</span>
+                    <span>Suelo: <strong class="text-slate-700">{{ proyecto.ref_tipo_suelo }}</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 self-start">
+            <a href="/proyectos/{{ proyecto.id }}/editar" class="traza-btn-secondary traza-btn-sm"
+                hx-boost="true" hx-target="#main-content" hx-swap="innerHTML">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Editar
+            </a>
+        </div>
+    </div>
+
+    <!-- Score Card (if available) -->
+    {% if proyecto.score is not none %}
+    <div class="traza-card mb-6 flex items-center gap-6 flex-wrap">
+        <div class="flex items-center gap-4">
+            <div class="score-circle w-16 h-16 {% if proyecto.score >= 80 %}bg-emerald-100{% elif proyecto.score >= 60 %}bg-blue-100{% elif proyecto.score >= 40 %}bg-amber-100{% else %}bg-red-100{% endif %}">
+                <span class="score-circle-text {% if proyecto.score >= 80 %}score-excelente{% elif proyecto.score >= 60 %}score-bueno{% elif proyecto.score >= 40 %}score-regular{% else %}score-deficiente{% endif %}">
+                    {{ "%.0f"|format(proyecto.score) }}
+                </span>
+            </div>
+            <div>
+                <p class="text-sm text-slate-500">Score General</p>
+                <p class="text-sm font-semibold text-slate-700">
+                    {% if proyecto.score >= 80 %}Excelente{% elif proyecto.score >= 60 %}Bueno{% elif proyecto.score >= 40 %}Regular{% else %}Deficiente{% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="flex-1 min-w-[200px]">
+            <div class="score-bar-container h-4">
+                <div class="score-bar-fill {% if proyecto.score >= 80 %}score-bar-green{% elif proyecto.score >= 50 %}score-bar-yellow{% else %}score-bar-red{% endif %}"
+                    style="width: {{ proyecto.score }}%;"></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">Evaluacion completa: {{ "%.1f"|format(proyecto.score) }}%</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="border-b border-slate-200">
+            <nav class="flex gap-1 -mb-px overflow-x-auto" role="tablist" aria-label="Secciones del proyecto">
+                <button role="tab" aria-selected="true" aria-controls="tab-content"
+                    id="tab-documentos"
+                    class="tab-active px-4 py-3 text-sm whitespace-nowrap transition-colors"
+                    hx-get="/proyectos/{{ proyecto.id }}/documentos"
+                    hx-target="#tab-content"
+                    hx-swap="innerHTML"
+                    hx-trigger="click"
+                    onclick="setActiveTab(this)">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Documentos
+                </button>
+                <button role="tab" aria-selected="false" aria-controls="tab-content"
+                    id="tab-evidencias"
+                    class="tab-inactive px-4 py-3 text-sm whitespace-nowrap transition-colors"
+                    hx-get="/proyectos/{{ proyecto.id }}/evidencias"
+                    hx-target="#tab-content"
+                    hx-swap="innerHTML"
+                    hx-trigger="click"
+                    onclick="setActiveTab(this)">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Evidencias
+                </button>
+                <button role="tab" aria-selected="false" aria-controls="tab-content"
+                    id="tab-verificaciones"
+                    class="tab-inactive px-4 py-3 text-sm whitespace-nowrap transition-colors"
+                    hx-get="/proyectos/{{ proyecto.id }}/verificaciones"
+                    hx-target="#tab-content"
+                    hx-swap="innerHTML"
+                    hx-trigger="click"
+                    onclick="setActiveTab(this)">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Verificaciones
+                </button>
+                <button role="tab" aria-selected="false" aria-controls="tab-content"
+                    id="tab-dictamen"
+                    class="tab-inactive px-4 py-3 text-sm whitespace-nowrap transition-colors"
+                    hx-get="/proyectos/{{ proyecto.id }}/dictamen"
+                    hx-target="#tab-content"
+                    hx-swap="innerHTML"
+                    hx-trigger="click"
+                    onclick="setActiveTab(this)">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Dictamen
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content" class="mt-4"
+            hx-get="/proyectos/{{ proyecto.id }}/documentos"
+            hx-trigger="load"
+            hx-target="this"
+            hx-swap="innerHTML">
+            <div class="flex items-center justify-center py-12 text-slate-400">
+                <svg class="spinner w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Cargando...
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function setActiveTab(button) {
+        document.querySelectorAll('[role="tab"]').forEach(function(tab) {
+            tab.classList.remove('tab-active');
+            tab.classList.add('tab-inactive');
+            tab.setAttribute('aria-selected', 'false');
+        });
+        button.classList.remove('tab-inactive');
+        button.classList.add('tab-active');
+        button.setAttribute('aria-selected', 'true');
+    }
+</script>
+{% endblock %}

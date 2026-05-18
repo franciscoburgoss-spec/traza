@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% block title %}Nueva Solicitud ING | TRAZA{% endblock %}
+
+{% block content %}
+<nav class="flex items-center gap-2 text-sm text-traza-500 mb-4">
+    <a href="/ing" class="hover:text-traza-800 transition-colors">ING</a>
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-traza-800 font-medium">Nueva Solicitud ING #1</span>
+</nav>
+
+<div class="max-w-3xl mx-auto">
+    <!-- Preview del Acronimo -->
+    <div class="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl shadow-sm border border-emerald-200 p-5 mb-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-emerald-600 uppercase tracking-wider">Acronimo que se generara</p>
+                <p class="text-xs text-traza-500 mt-0.5">Formato: [Tipo][Ano][Comuna][Nombre]</p>
+            </div>
+            <code id="preview-acronimo" class="text-3xl font-mono font-bold text-emerald-700 bg-white px-4 py-2 rounded-lg shadow-sm border border-emerald-200">--------</code>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-traza-200 overflow-hidden">
+        <div class="p-5 border-b border-traza-100 bg-traza-50">
+            <h1 class="text-lg font-bold text-traza-900">Nueva Solicitud ING #1</h1>
+            <p class="text-sm text-traza-500 mt-1">Ingresa los datos del proyecto recibido del Coordinador. TRAZA generara el acronimo y el proyecto automaticamente.</p>
+        </div>
+
+        <form id="form-nueva-ing" class="p-5 space-y-5">
+
+            <!-- Nombre del proyecto -->
+            <div>
+                <label class="block text-sm font-semibold text-traza-700 mb-1">
+                    Nombre del proyecto <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="nombre_proyecto" id="nombre_proyecto" required
+                    placeholder="Ej: Condominio Los Almendros"
+                    class="w-full border border-traza-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    oninput="actualizarPreview()">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Tipo de proyecto -->
+                <div>
+                    <label class="block text-sm font-semibold text-traza-700 mb-1">
+                        Tipo de proyecto <span class="text-red-500">*</span>
+                    </label>
+                    <select name="tipo_proyecto" id="tipo_proyecto" required
+                        class="w-full border border-traza-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        onchange="actualizarPreview()">
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="HAB">Habitacional (H)</option>
+                        <option value="TEC">Tecnico (T)</option>
+                        <option value="DOS">Dos Fases (D)</option>
+                        <option value="OTR">Otros (O)</option>
+                    </select>
+                </div>
+
+                <!-- Comuna (33 de O'Higgins) — ordenadas alfabeticamente -->
+                <div>
+                    <label class="block text-sm font-semibold text-traza-700 mb-1">
+                        Comuna <span class="text-red-500">*</span> <span class="text-xs font-normal text-traza-400">(33 comunas de O'Higgins)</span>
+                    </label>
+                    <select name="comuna" id="comuna" required
+                        class="w-full border border-traza-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        onchange="onComunaChange()">
+                        <option value="">Seleccionar comuna...</option>
+                        <option value="Chépica">Chépica</option>
+                        <option value="Chimbarongo">Chimbarongo</option>
+                        <option value="Codegua">Codegua</option>
+                        <option value="Coinco">Coinco</option>
+                        <option value="Coltauco">Coltauco</option>
+                        <option value="Doñihue">Doñihue</option>
+                        <option value="Graneros">Graneros</option>
+                        <option value="La Estrella">La Estrella</option>
+                        <option value="Las Cabras">Las Cabras</option>
+                        <option value="Litueche">Litueche</option>
+                        <option value="Lolol">Lolol</option>
+                        <option value="Machalí">Machalí</option>
+                        <option value="Malloa">Malloa</option>
+                        <option value="Marchihue">Marchihue</option>
+                        <option value="Mostazal">Mostazal</option>
+                        <option value="Nancagua">Nancagua</option>
+                        <option value="Navidad">Navidad</option>
+                        <option value="Olivar">Olivar</option>
+                        <option value="Palmilla">Palmilla</option>
+                        <option value="Paredones">Paredones</option>
+                        <option value="Peralillo">Peralillo</option>
+                        <option value="Peumo">Peumo</option>
+                        <option value="Pichidegua">Pichidegua</option>
+                        <option value="Pichilemu">Pichilemu</option>
+                        <option value="Placilla">Placilla</option>
+                        <option value="Pumanque">Pumanque</option>
+                        <option value="Quinta de Tilcoco">Quinta de Tilcoco</option>
+                        <option value="Rancagua">Rancagua</option>
+                        <option value="Rengo">Rengo</option>
+                        <option value="Requínoa">Requínoa</option>
+                        <option value="San Fernando">San Fernando</option>
+                        <option value="San Vicente">San Vicente</option>
+                        <option value="Santa Cruz">Santa Cruz</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Empresa -->
+                <div>
+                    <label class="block text-sm font-semibold text-traza-700 mb-1">
+                        Empresa desarrolladora <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="empresa" required
+                        placeholder="Ej: Constructora del Sur SpA"
+                        class="w-full border border-traza-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                </div>
+
+                <!-- Zona sismica — AUTOMATICA, no editable -->
+                <div>
+                    <label class="block text-sm font-semibold text-traza-700 mb-1">
+                        Zona sismica <span class="text-xs font-normal text-traza-400">(automatica por comuna)</span>
+                    </label>
+                    <div id="zona-sismica-display" class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-600 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Selecciona una comuna...</span>
+                    </div>
+                    <!-- Campo oculto para enviar al servidor -->
+                    <input type="hidden" name="zona_sismica" id="zona_sismica_input" value="">
+                </div>
+            </div>
+
+            <!-- Fechas — 1.10: Validacion cruzada fecha_limite >= fecha_solicitud -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-traza-700 mb-1">Fecha de solicitud (recepcion)</label>
+                    <input type="date" name="fecha_solicitud" id="fecha_solicitud"
+                        class="w-full border border-traza-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-traza-700 mb-1">
+                        Fecha limite de respuesta
+                        <span id="fecha-limite-error" class="hidden text-red-500 text-xs font-normal ml-1"></span>
+                    </label>
+                    <input type="date" name="fecha_limite" id="fecha_limite"
+                        class="w-full border border-traza-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    <p class="text-xs text-traza-400 mt-1">Debe ser igual o posterior a la fecha de solicitud</p>
+                </div>
+            </div>
+
+            <!-- Link descarga -->
+            <div>
+                <label class="block text-sm font-semibold text-traza-700 mb-1">Link descarga ZIP</label>
+                <input type="url" name="link_descarga" placeholder="https://drive.google.com/..."
+                    class="w-full border border-traza-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+            </div>
+
+            <!-- Modulos -->
+            <div>
+                <label class="block text-sm font-semibold text-traza-700 mb-2">
+                    Modulos a revisar <span class="text-red-500">*</span>
+                </label>
+                <div class="flex flex-wrap gap-3">
+                    {% for mod in ['MDS', 'EST', 'HAB', 'URB'] %}
+                    <label class="flex items-center gap-2 px-4 py-2.5 border border-traza-200 rounded-lg cursor-pointer hover:bg-emerald-50 hover:border-emerald-300 transition-colors">
+                        <input type="checkbox" name="modulos" value="{{ mod }}" checked
+                            class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                        <span class="text-sm font-medium">{{ mod }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-traza-100">
+                <a href="/ing" class="px-5 py-2.5 text-sm text-traza-600 hover:bg-traza-100 rounded-lg transition-colors">Cancelar</a>
+                <button type="submit" class="px-6 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm">
+                    Crear Solicitud ING y Generar Proyecto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="notification-area" class="fixed top-16 right-4 z-50 space-y-2"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Mapa comuna -> zona sismica (INMUTABLE)
+const ZONAS_SISMICAS = {
+    'Chépica': 2, 'Chimbarongo': 2, 'Codegua': 2, 'Coinco': 2, 'Coltauco': 2,
+    'Doñihue': 2, 'Graneros': 2, 'La Estrella': 3, 'Las Cabras': 3, 'Litueche': 3,
+    'Lolol': 3, 'Machalí': 2, 'Malloa': 2, 'Marchihue': 3, 'Mostazal': 2,
+    'Nancagua': 2, 'Navidad': 3, 'Olivar': 2, 'Palmilla': 3, 'Paredones': 3,
+    'Peralillo': 3, 'Peumo': 3, 'Pichidegua': 3, 'Pichilemu': 3, 'Placilla': 2,
+    'Pumanque': 3, 'Quinta de Tilcoco': 2, 'Rancagua': 2, 'Rengo': 2,
+    'Requínoa': 2, 'San Fernando': 2, 'San Vicente': 2, 'Santa Cruz': 3,
+};
+
+// Mapa comuna -> codigo 3 letras (para el acronimo)
+const CODIGOS_COMUNA = {
+    'Chépica': 'CHP', 'Chimbarongo': 'CHB', 'Codegua': 'COD', 'Coinco': 'COI',
+    'Coltauco': 'COL', 'Doñihue': 'DON', 'Graneros': 'GRA', 'La Estrella': 'LES',
+    'Las Cabras': 'LCB', 'Litueche': 'LIT', 'Lolol': 'LOL', 'Machalí': 'MCH',
+    'Malloa': 'MLL', 'Marchihue': 'MRG', 'Mostazal': 'MST', 'Nancagua': 'NCG',
+    'Navidad': 'NAV', 'Olivar': 'OLI', 'Palmilla': 'PLM', 'Paredones': 'PAR',
+    'Peralillo': 'PER', 'Peumo': 'PEU', 'Pichidegua': 'PCH', 'Pichilemu': 'PIC',
+    'Placilla': 'PLC', 'Pumanque': 'PMQ', 'Quinta de Tilcoco': 'QTC',
+    'Rancagua': 'RAN', 'Rengo': 'RNG', 'Requínoa': 'REQ',
+    'San Fernando': 'SFE', 'San Vicente': 'SVT', 'Santa Cruz': 'SCZ',
+};
+
+const LETRA_TIPO = {'HAB': 'H', 'TEC': 'T', 'DOS': 'D', 'OTR': 'O'};
+const STOP_WORDS = ['el','la','los','las','de','del','en','un','una','con','para','por','al','su','sus','lo'];
+
+// Al cambiar la comuna: autocompletar zona sismica (INMUTABLE)
+function onComunaChange() {
+    const comuna = document.getElementById('comuna').value;
+    const display = document.getElementById('zona-sismica-display');
+    const hidden = document.getElementById('zona_sismica_input');
+
+    if (comuna && ZONAS_SISMICAS[comuna]) {
+        const zona = ZONAS_SISMICAS[comuna];
+        let colorClass = zona === 3 ? 'text-red-700 bg-red-50 border-red-200' : 'text-blue-700 bg-blue-50 border-blue-200';
+        display.className = `w-full px-3 py-2.5 rounded-lg text-sm flex items-center gap-2 border ${colorClass}`;
+        display.innerHTML = `
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="font-semibold">Zona ${zona}</span>
+            <span class="text-xs opacity-70">— fijo por comuna, no editable</span>
+        `;
+        hidden.value = zona;
+    } else {
+        display.className = 'w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-600 flex items-center gap-2';
+        display.innerHTML = `
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Selecciona una comuna...</span>
+        `;
+        hidden.value = '';
+    }
+
+    actualizarPreview();
+}
+
+// Preview del acronimo [T][YY][CCC][NN]
+function actualizarPreview() {
+    const tipo = document.getElementById('tipo_proyecto').value;
+    const comuna = document.getElementById('comuna').value;
+    const nombre = document.getElementById('nombre_proyecto').value;
+
+    if (!tipo || !comuna || !nombre) {
+        document.getElementById('preview-acronimo').textContent = '--------';
+        return;
+    }
+
+    const t = LETRA_TIPO[tipo] || 'X';
+    const yy = new Date().getFullYear().toString().slice(-2);
+    const ccc = CODIGOS_COMUNA[comuna] || 'XXX';
+
+    const palabras = nombre.match(/[A-Za-z\u00C0-\u00FF]+/g) || [];
+    const filtradas = palabras.filter(p => !STOP_WORDS.includes(p.toLowerCase()));
+    let nn = 'XX';
+    if (filtradas.length >= 2) {
+        nn = (filtradas[0][0] + filtradas[1][0]).toUpperCase();
+    } else if (filtradas.length === 1) {
+        nn = filtradas[0].slice(0, 2).toUpperCase();
+    }
+
+    document.getElementById('preview-acronimo').textContent = t + yy + ccc + nn;
+}
+
+// 1.10: Validacion cruzada de fechas — sincronizar min de fecha_limite con fecha_solicitud
+const fechaSolicitudInput = document.getElementById('fecha_solicitud');
+const fechaLimiteInput = document.getElementById('fecha_limite');
+const fechaLimiteError = document.getElementById('fecha-limite-error');
+
+function actualizarMinFechaLimite() {
+    const fechaSol = fechaSolicitudInput.value;
+    if (fechaSol) {
+        fechaLimiteInput.min = fechaSol;
+    } else {
+        fechaLimiteInput.removeAttribute('min');
+    }
+}
+
+function validarFechas() {
+    const fechaSol = fechaSolicitudInput.value;
+    const fechaLim = fechaLimiteInput.value;
+    if (fechaSol && fechaLim && fechaLim < fechaSol) {
+        fechaLimiteInput.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+        fechaLimiteError.textContent = '(debe ser >= fecha solicitud)';
+        fechaLimiteError.classList.remove('hidden');
+        return false;
+    }
+    fechaLimiteInput.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+    fechaLimiteError.classList.add('hidden');
+    fechaLimiteError.textContent = '';
+    return true;
+}
+
+fechaSolicitudInput.addEventListener('change', function() {
+    actualizarMinFechaLimite();
+    validarFechas();
+});
+fechaLimiteInput.addEventListener('change', validarFechas);
+
+// Form submit — 1.10: Validacion previa + manejo de error 422 detallado
+document.getElementById('form-nueva-ing').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // 1.10: Validacion previa de fechas
+    if (!validarFechas()) {
+        mostrarNotif('La fecha limite no puede ser anterior a la fecha de solicitud', 'error');
+        fechaLimiteInput.focus();
+        return;
+    }
+
+    const modulos = [];
+    form.querySelectorAll('input[name="modulos"]:checked').forEach(cb => modulos.push(cb.value));
+
+    const payload = {
+        nombre_proyecto: formData.get('nombre_proyecto'),
+        empresa: formData.get('empresa'),
+        tipo_proyecto: formData.get('tipo_proyecto'),
+        comuna: formData.get('comuna'),
+        modulos: modulos,
+        fecha_solicitud: formData.get('fecha_solicitud') || null,
+        fecha_limite: formData.get('fecha_limite') || null,
+        link_descarga: formData.get('link_descarga') || null,
+        zona_sismica: formData.get('zona_sismica') ? parseInt(formData.get('zona_sismica')) : null,
+    };
+
+    try {
+        const resp = await fetch('/api/v1/ing/solicitudes', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            mostrarNotif(`Solicitud ING #1 creada. Acronimo: ${data.acronimo_proyecto}`, 'success');
+            setTimeout(() => window.location.href = `/ing/${data.id}`, 1200);
+        } else if (resp.status === 422) {
+            // 1.10: Parsear error 422 para mostrar mensaje especifico
+            const err = await resp.json();
+            let mensaje = err.detail || 'Error de validacion';
+            // Buscar error especifico de fecha_limite
+            if (JSON.stringify(err).toLowerCase().includes('fecha_limite') ||
+                JSON.stringify(err).toLowerCase().includes('limite')) {
+                mensaje = 'La fecha limite no puede ser anterior a la fecha de solicitud';
+                fechaLimiteInput.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                fechaLimiteInput.focus();
+            }
+            mostrarNotif(mensaje, 'error');
+        } else {
+            const err = await resp.json();
+            mostrarNotif(err.detail || 'Error al crear', 'error');
+        }
+    } catch(e) {
+        mostrarNotif('Error de red', 'error');
+    }
+});
+
+function mostrarNotif(mensaje, tipo) {
+    const area = document.getElementById('notification-area');
+    const colors = tipo === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+    const notif = document.createElement('div');
+    notif.className = `${colors} text-white px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium`;
+    notif.textContent = mensaje;
+    area.appendChild(notif);
+    setTimeout(() => notif.remove(), 5000);
+}
+</script>
+{% endblock %}

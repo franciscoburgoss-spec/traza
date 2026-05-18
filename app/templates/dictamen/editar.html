@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Dictamen - {{ proyecto.codigo }} - TRAZA{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+        <button class="traza-btn-secondary traza-btn-sm"
+            hx-get="/proyectos/{{ proyecto.id }}/dictamen"
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-push-url="true">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Editar Dictamen</h1>
+            <p class="text-sm text-slate-500">{{ proyecto.codigo }} - {{ proyecto.nombre }}</p>
+        </div>
+    </div>
+
+    <!-- Editor Card -->
+    <div class="traza-card mb-4">
+        <form id="dictamen-form"
+            hx-post="/proyectos/{{ proyecto.id }}/dictamen"
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-indicator="#dictamen-spinner"
+            class="space-y-5">
+
+            <!-- Score + Categoria (read-only computed) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="traza-label">Score Calculado</label>
+                    <input type="number" step="0.1" min="0" max="100"
+                        value="{{ dictamen.score if dictamen else '' }}"
+                        name="score"
+                        class="traza-input" required>
+                </div>
+                <div>
+                    <label class="traza-label">Categoria</label>
+                    <select name="categoria" class="traza-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Excelente" {% if dictamen and dictamen.categoria == 'Excelente' %}selected{% endif %}>Excelente</option>
+                        <option value="Bueno" {% if dictamen and dictamen.categoria == 'Bueno' %}selected{% endif %}>Bueno</option>
+                        <option value="Regular" {% if dictamen and dictamen.categoria == 'Regular' %}selected{% endif %}>Regular</option>
+                        <option value="Deficiente" {% if dictamen and dictamen.categoria == 'Deficiente' %}selected{% endif %}>Deficiente</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="traza-label">Estado</label>
+                    <select name="estado" class="traza-select" required>
+                        <option value="BORRADOR" {% if dictamen and dictamen.estado == 'BORRADOR' %}selected{% endif %}>Borrador</option>
+                        <option value="APROBADO" {% if dictamen and dictamen.estado == 'APROBADO' %}selected{% endif %}>Aprobado</option>
+                        <option value="RECHAZADO" {% if dictamen and dictamen.estado == 'RECHAZADO' %}selected{% endif %}>Rechazado</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Dictamen Texto -->
+            <div>
+                <label for="dictamen_texto" class="traza-label">
+                    Texto del Dictamen <span class="text-red-500">*</span>
+                </label>
+                <textarea id="dictamen_texto" name="dictamen_texto" rows="12" required
+                    class="traza-textarea font-mono text-sm"
+                    placeholder="Escriba aqui el dictamen tecnico del proyecto...
+
+Debe incluir:
+- Resumen de la evaluacion
+- Hallazgos principales
+- Recomendaciones
+- Conclusion final">{{ dictamen.dictamen_texto if dictamen else '' }}</textarea>
+                <p class="text-xs text-slate-400 mt-1">Soporta texto plano. El HAB se genera automaticamente.</p>
+            </div>
+
+            <!-- HAB Preview Toggle -->
+            <div>
+                <button type="button" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                    onclick="document.getElementById('hab-preview-section').classList.toggle('hidden')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Previsualizar HAB
+                </button>
+                <div id="hab-preview-section" class="hidden mt-3 border border-slate-200 rounded-lg overflow-hidden">
+                    {% if dictamen and dictamen.hab_contenido %}
+                        <iframe srcdoc="{{ dictamen.hab_contenido }}"
+                            class="w-full h-64 bg-white"
+                            title="Preview HAB">
+                        </iframe>
+                    {% else %}
+                        <div class="p-8 text-center text-slate-400 text-sm bg-slate-50">
+                            <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            El HAB se generara al guardar el dictamen
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                <button type="button" class="traza-btn-secondary"
+                    hx-get="/proyectos/{{ proyecto.id }}/dictamen"
+                    hx-target="#main-content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true">
+                    Cancelar
+                </button>
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <!-- Rechazar -->
+                    <button type="button" class="traza-btn-danger"
+                        onclick="if(confirm('Esta seguro de RECHAZAR este dictamen?')) {
+                            document.getElementById('dictamen_estado_hidden').value = 'RECHAZADO';
+                            document.getElementById('dictamen-form').submit();
+                        }"
+                        {% if dictamen and dictamen.estado == 'RECHAZADO' %}disabled{% endif %}>
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Rechazar
+                    </button>
+
+                    <!-- Guardar como borrador -->
+                    <button type="submit" class="traza-btn-secondary">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                        </svg>
+                        Guardar Borrador
+                    </button>
+
+                    <!-- Aprobar -->
+                    <button type="button" class="traza-btn-primary"
+                        onclick="if(confirm('Esta seguro de APROBAR este dictamen? Esta accion es definitiva.')) {
+                            document.getElementById('dictamen_estado_hidden').value = 'APROBADO';
+                            document.getElementById('dictamen-form').submit();
+                        }"
+                        {% if dictamen and dictamen.estado == 'APROBADO' %}disabled{% endif %}>
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Aprobar
+                    </button>
+                </div>
+            </div>
+
+            <input type="hidden" name="estado" id="dictamen_estado_hidden" value="BORRADOR">
+
+            <span id="dictamen-spinner" class="htmx-indicator fixed bottom-4 left-4">
+                <div class="toast toast-info">
+                    <svg class="spinner w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Guardando dictamen...
+                </div>
+            </span>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{# Template parcial para lista de verificaciones de un proyecto #}
+
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+    <div>
+        <h2 class="text-lg font-semibold text-slate-800">Resultados de Verificacion</h2>
+        <p class="text-sm text-slate-500">
+            {% if verificaciones %}
+                {% set total = verificaciones|length %}
+                {% set cumplen = verificaciones|selectattr('resultado', 'equalto', 'CUMPLE')|list|length %}
+                {{ total }} regla(s) evaluada(s) - {{ cumplen }} cumple(n)
+            {% else %}
+                Verificacion automatica de reglas tecnicas
+            {% endif %}
+        </p>
+    </div>
+    <button class="traza-btn-primary self-start"
+        hx-post="/proyectos/{{ proyecto_id }}/verificar"
+        hx-target="#tab-content"
+        hx-swap="innerHTML"
+        hx-confirm="Ejecutar verificacion de todas las reglas?"
+        hx-indicator="#verificar-spinner">
+        <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Verificar Todo
+            <span id="verificar-spinner" class="htmx-indicator ml-1">
+                <svg class="spinner w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </span>
+        </span>
+    </button>
+</div>
+
+<!-- Summary Cards -->
+{% if verificaciones %}
+{% set total = verificaciones|length %}
+{% set cumplen = verificaciones|selectattr('resultado', 'equalto', 'CUMPLE')|list|length %}
+{% set no_cumplen = verificaciones|selectattr('resultado', 'equalto', 'NO_CUMPLE')|list|length %}
+{% set no_aplica = verificaciones|selectattr('resultado', 'equalto', 'NO_APLICA')|list|length %}
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-lg border border-slate-200 p-3 text-center">
+        <p class="text-2xl font-bold text-slate-700">{{ total }}</p>
+        <p class="text-xs text-slate-500">Total Reglas</p>
+    </div>
+    <div class="bg-emerald-50 rounded-lg border border-emerald-200 p-3 text-center">
+        <p class="text-2xl font-bold text-emerald-700">{{ cumplen }}</p>
+        <p class="text-xs text-emerald-600">Cumplen</p>
+    </div>
+    <div class="bg-red-50 rounded-lg border border-red-200 p-3 text-center">
+        <p class="text-2xl font-bold text-red-700">{{ no_cumplen }}</p>
+        <p class="text-xs text-red-600">No Cumplen</p>
+    </div>
+    <div class="bg-slate-50 rounded-lg border border-slate-200 p-3 text-center">
+        <p class="text-2xl font-bold text-slate-500">{{ no_aplica }}</p>
+        <p class="text-xs text-slate-400">No Aplica</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="traza-card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="traza-table">
+            <thead>
+                <tr>
+                    <th scope="col">Regla</th>
+                    <th scope="col">Resultado</th>
+                    <th scope="col">Severidad</th>
+                    <th scope="col">Mensaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if verificaciones %}
+                    {% for v in verificaciones %}
+                    <tr class="{% if v.resultado == 'NO_CUMPLE' and v.severidad == 'CRITICA' %}bg-red-50{% elif v.resultado == 'NO_CUMPLE' %}bg-amber-50{% endif %}">
+                        <td>
+                            <span class="font-mono text-xs text-slate-500">{{ v.regla_codigo or v.regla_id }}</span>
+                            <p class="text-sm font-medium text-slate-800 mt-0.5">{{ v.regla_nombre }}</p>
+                        </td>
+                        <td>
+                            {% if v.resultado == 'CUMPLE' %}
+                                <span class="badge badge-cumple">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    CUMPLE
+                                </span>
+                            {% elif v.resultado == 'NO_CUMPLE' %}
+                                <span class="badge badge-no-cumple">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    NO CUMPLE
+                                </span>
+                            {% else %}
+                                <span class="badge badge-no-aplica">NO APLICA</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if v.severidad == 'CRITICA' %}
+                                <span class="text-xs font-bold text-red-700 bg-red-100 px-1.5 py-0.5 rounded">CRITICA</span>
+                            {% elif v.severidad == 'ALTA' %}
+                                <span class="text-xs font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">ALTA</span>
+                            {% elif v.severidad == 'MEDIA' %}
+                                <span class="text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">MEDIA</span>
+                            {% else %}
+                                <span class="text-xs text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">BAJA</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-xs text-slate-600 max-w-xs">
+                            {{ v.mensaje or '-' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-10 text-slate-400">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm">Aun no se han ejecutado verificaciones</p>
+                            <button class="traza-btn-primary traza-btn-sm mt-3"
+                                hx-post="/proyectos/{{ proyecto_id }}/verificar"
+                                hx-target="#tab-content"
+                                hx-swap="innerHTML"
+                                hx-confirm="Ejecutar verificacion?">
+                                Verificar ahora
+                            </button>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+{% block title %}ING #{{ solicitud.numero_iteracion }} - {{ solicitud.nombre_proyecto }} | TRAZA{% endblock %}
+
+{% block content %}
+<nav class="flex items-center gap-2 text-sm text-slate-500 mb-4">
+    <a href="/ing" class="hover:text-slate-800 transition-colors">ING</a>
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-slate-800 font-medium">{{ solicitud.nombre_proyecto }}</span>
+    <span class="text-xs px-2 py-0.5 rounded-full font-medium
+        {% if solicitud.estado == 'recibida' %}bg-amber-100 text-amber-700
+        {% elif solicitud.estado == 'en_revision' %}bg-blue-100 text-blue-700
+        {% elif solicitud.estado == 'aceptada' %}bg-emerald-100 text-emerald-700
+        {% elif solicitud.estado == 'observada' %}bg-red-100 text-red-700
+        {% endif %}">{{ solicitud.estado }}</span>
+</nav>
+
+<!-- Header del Proyecto -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-5">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2 flex-wrap">
+                <h1 class="text-xl font-bold text-slate-900">{{ solicitud.nombre_proyecto }}</h1>
+                <span class="text-sm text-slate-500">ING #{{ solicitud.numero_iteracion }}</span>
+                {% if solicitud.acronimo_proyecto %}
+                <code class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-mono font-semibold rounded border border-emerald-200">{{ solicitud.acronimo_proyecto }}</code>
+                {% endif %}
+            </div>
+            <p class="text-sm text-slate-600 mb-3">{{ solicitud.empresa }}</p>
+            <div class="flex flex-wrap gap-3 text-xs text-slate-500">
+                <span class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                    {{ modulos|join(', ') }}
+                </span>
+                {% if solicitud.comuna %}
+                <span class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                    {{ solicitud.comuna }}{% if solicitud.zona_sismica %} (Z{{ solicitud.zona_sismica }}){% endif %}
+                </span>
+                {% endif %}
+                {% if solicitud.fecha_solicitud %}
+                <span class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Recibido: {{ solicitud.fecha_solicitud }}
+                </span>
+                {% endif %}
+                {% if solicitud.fecha_limite %}
+                <span class="flex items-center gap-1 {% if solicitud.estado in ('recibida', 'en_revision') and dias_restantes <= 3 %}text-red-500 font-medium{% endif %}">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Limite: {{ solicitud.fecha_limite }}
+                </span>
+                {% endif %}
+                {% if solicitud.ruta_carpeta %}
+                <span class="flex items-center gap-1 text-emerald-600 cursor-pointer hover:underline" onclick="verEstructuraCarpetas()">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                    {{ solicitud.ruta_carpeta }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <!-- Iniciar Revision: SOLO si estado es 'recibida' -->
+            {% if solicitud.estado == 'recibida' %}
+            <button onclick="cambiarEstadoSolicitud('en_revision')"
+                class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors shadow-sm">
+                Iniciar Revision
+            </button>
+            {% endif %}
+
+            <!-- Generar email siempre visible -->
+            <button onclick="generarEmail()"
+                class="px-3 py-1.5 bg-slate-700 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors flex items-center gap-1 shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                Email al Coordinador
+            </button>
+
+            <!-- Siguiente iteracion solo si observada -->
+            {% if solicitud.estado == 'observada' %}
+            <button onclick="crearSiguienteIteracion()"
+                class="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-700 transition-colors shadow-sm">
+                Crear ING #{{ solicitud.numero_iteracion + 1 }}
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Timeline Visual de Iteracion -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-5">
+    <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Estado de la Iteracion</span>
+        <span class="text-xs text-slate-400">ING #{{ solicitud.numero_iteracion }}</span>
+    </div>
+    <div class="flex items-center gap-0">
+        {% set estados_timeline = [
+            ('recibida', 'Recibida', 'amber'),
+            ('en_revision', 'En Revision', 'blue'),
+            ('aceptada', 'Aceptada', 'emerald'),
+            ('observada', 'Observada', 'red')
+        ] %}
+        {% for codigo, label, color in estados_timeline %}
+            {% set activo = solicitud.estado == codigo %}
+            {% set pasado = False %}
+            {# Determinar si este estado ya fue superado #}
+            {% if solicitud.estado == 'en_revision' and codigo == 'recibida' %}{% set pasado = True %}{% endif %}
+            {% if solicitud.estado == 'aceptada' and codigo in ('recibida', 'en_revision') %}{% set pasado = True %}{% endif %}
+            {% if solicitud.estado == 'observada' and codigo in ('recibida', 'en_revision') %}{% set pasado = True %}{% endif %}
+
+            <div class="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg mx-0.5
+                {% if activo %}bg-{{ color }}-50 border border-{{ color }}-200{% elif pasado %}bg-{{ color }}-50/30{% else %}bg-slate-50{% endif %}">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center
+                    {% if activo %}bg-{{ color }}-500 text-white shadow-sm{% elif pasado %}bg-{{ color }}-300 text-white{% else %}bg-slate-200 text-slate-400{% endif %}">
+                    {% if pasado and not activo %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                    {% else %}
+                        <span class="text-xs font-bold">{{ loop.index }}</span>
+                    {% endif %}
+                </div>
+                <span class="text-[10px] font-medium {% if activo %}text-{{ color }}-700{% elif pasado %}text-{{ color }}-500{% else %}text-slate-400{% endif %}">{{ label }}</span>
+            </div>
+            {% if not loop.last %}
+            <div class="flex-shrink-0 w-4 flex items-center">
+                <div class="w-full h-0.5 {% if pasado %}bg-emerald-400{% else %}bg-slate-200{% endif %}"></div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Progreso -->
+{% if progreso.total > 0 %}
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-5">
+    <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium text-slate-700">Progreso Revisiones Cruzadas</span>
+        <span class="text-xs text-slate-500">{{ progreso.revisadas }}/{{ progreso.total }} revisadas</span>
+    </div>
+    <div class="w-full bg-slate-100 rounded-full h-2.5">
+        <div class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width: {{ (progreso.revisadas / progreso.total * 100) if progreso.total else 0 }}%"></div>
+    </div>
+    <div class="flex gap-4 mt-2 text-xs">
+        <span class="text-emerald-600">{{ progreso.aceptadas }} aceptadas</span>
+        <span class="text-red-600">{{ progreso.observadas }} observadas</span>
+        <span class="text-orange-600">{{ progreso.faltantes }} faltantes</span>
+        <span class="text-slate-400">{{ progreso.total - progreso.revisadas }} pendientes</span>
+    </div>
+</div>
+{% endif %}
+
+<!-- 3-Column Layout: Info | Documentos | Revisiones -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- Columna 1: Info del Proyecto -->
+    <div class="space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+            <div class="p-4 border-b border-slate-100">
+                <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Info del Proyecto
+                </h2>
+            </div>
+            <div class="p-4 space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-slate-500">Estado ING</span>
+                    <span class="font-medium {% if solicitud.estado == 'recibida' %}text-amber-600{% elif solicitud.estado == 'en_revision' %}text-blue-600{% elif solicitud.estado == 'aceptada' %}text-emerald-600{% elif solicitud.estado == 'observada' %}text-red-600{% endif %}">{{ solicitud.estado }}</span>
+                </div>
+                <div class="flex justify-between"><span class="text-slate-500">Iteracion</span><span class="font-medium">#{{ solicitud.numero_iteracion }}</span></div>
+                {% if solicitud_anterior_id %}
+                <div class="flex justify-between"><span class="text-slate-500">Iteracion anterior</span><a href="/ing/{{ solicitud_anterior_id }}" class="text-blue-600 hover:underline">Ver ING #{{ solicitud.numero_iteracion - 1 }}</a></div>
+                {% endif %}
+                <div class="flex justify-between"><span class="text-slate-500">Documentos</span><span class="font-medium">{{ conteo.total }} total</span></div>
+                <div class="pt-2 border-t border-slate-100 space-y-1">
+                    <div class="flex justify-between text-xs"><span class="text-emerald-600">Aceptados</span><span class="font-medium text-emerald-600">{{ conteo.aceptado }}</span></div>
+                    <div class="flex justify-between text-xs"><span class="text-red-600">Observados</span><span class="font-medium text-red-600">{{ conteo.observado }}</span></div>
+                    <div class="flex justify-between text-xs"><span class="text-orange-600">Faltantes</span><span class="font-medium text-orange-600">{{ conteo.faltante }}</span></div>
+                    <div class="flex justify-between text-xs"><span class="text-slate-400">No aplica</span><span class="font-medium text-slate-400">{{ conteo.no_aplica }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Iniciar R01 -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <button
+                {% if not puede_pasar_a_r01 %}disabled{% endif %}
+                onclick="{% if puede_pasar_a_r01 %}window.location.href='/proyectos/' + '{{ solicitud.proyecto_id }}'{% endif %}"
+                class="w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors
+                    {% if puede_pasar_a_r01 %}bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm{% else %}bg-slate-100 text-slate-400 cursor-not-allowed{% endif %}">
+                {% if puede_pasar_a_r01 %}Iniciar R01 &rarr;{% else %}R01 bloqueado — ING no aceptada (R5){% endif %}
+            </button>
+            {% if not puede_pasar_a_r01 %}<p class="text-xs text-slate-400 mt-2 text-center">Todos los documentos deben estar aceptados</p>{% endif %}
+        </div>
+    </div>
+
+    <!-- Columna 2: Documentos -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Documentos ({{ conteo.total }})
+            </h2>
+            {% if solicitud.estado != 'aceptada' %}
+            <button onclick="mostrarModalDocumento()" class="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded hover:bg-slate-200 transition-colors">+ Agregar</button>
+            {% endif %}
+        </div>
+        <div class="p-4 space-y-4">
+            {% for modulo, docs in documentos_por_modulo.items() if docs %}
+            <div>
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">{{ modulo }}</h3>
+                <div class="space-y-1.5">
+                    {% for doc in docs %}
+                    <div class="flex items-center gap-2 p-2 rounded-lg border text-sm
+                        {% if doc.estado == 'aceptado' %}bg-emerald-50 border-emerald-100
+                        {% elif doc.estado == 'observado' %}bg-red-50 border-red-100
+                        {% elif doc.estado == 'faltante' %}bg-orange-50 border-orange-100
+                        {% elif doc.estado == 'no_aplica' %}bg-slate-50 border-slate-100 opacity-60
+                        {% else %}bg-white border-slate-100
+                        {% endif %}">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="truncate font-medium">{{ doc.nombre_archivo }}</span>
+                                {% if doc.tipologia %}<span class="text-xs text-slate-400">({{ doc.tipologia }})</span>{% endif %}
+                            </div>
+                            {% if doc.observacion %}<p class="text-xs text-red-500 mt-0.5 truncate">{{ doc.observacion }}</p>{% endif %}
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <span class="text-[10px] px-1.5 py-0.5 rounded font-medium
+                                {% if doc.estado == 'aceptado' %}bg-emerald-100 text-emerald-700
+                                {% elif doc.estado == 'observado' %}bg-red-100 text-red-700
+                                {% elif doc.estado == 'faltante' %}bg-orange-100 text-orange-700
+                                {% elif doc.estado == 'no_aplica' %}bg-slate-100 text-slate-500
+                                {% else %}bg-slate-100 text-slate-600
+                                {% endif %}">{{ doc.estado }}</span>
+                            {% if solicitud.estado == 'en_revision' and doc.estado != 'no_aplica' %}
+                            <select onchange="cambiarEstadoDoc('{{ doc.id }}', this.value)" class="text-[10px] border border-slate-200 rounded px-1 py-0.5 bg-white">
+                                <option value="">Cambiar...</option>
+                                <option value="aceptado">Aceptar</option>
+                                <option value="observado">Observar</option>
+                                <option value="faltante">Faltante</option>
+                            </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-6 text-slate-400">
+                <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                <p class="text-sm">Sin documentos registrados</p>
+                {% if solicitud.estado != 'aceptada' %}<button onclick="mostrarModalDocumento()" class="text-emerald-600 hover:text-emerald-700 text-xs mt-1">Agregar documento &rarr;</button>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Columna 3: Revisiones Cruzadas -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Revisiones Cruzadas
+            </h2>
+            {% if solicitud.estado in ('recibida', 'en_revision') %}
+            <div class="flex gap-1">
+                <button onclick="inicializarChecklist()" class="text-[10px] px-2 py-1 bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors">Crear</button>
+                {% if solicitud.estado == 'en_revision' %}
+                <button onclick="reiniciarChecklist()" class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors" title="Reiniciar todas a pendiente">Reiniciar</button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="p-4 space-y-4">
+            {% set grupos = {'MDS_TOPO': '3.1 MDS ↔ Topografia', 'EST_ARQ': '3.2 EST ↔ Arquitectura', 'HAB_PRES': '3.3 HAB ↔ Presupuesto'} %}
+            {% for tipo, titulo in grupos.items() %}
+                {% set revs = revisiones_por_tipo.get(tipo, []) %}
+                {% if revs %}
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">{{ titulo }}</h3>
+                    <div class="space-y-2">
+                        {% for rev in revs %}
+                        <div class="p-2.5 rounded-lg border text-sm
+                            {% if rev.estado == 'aceptado' %}bg-emerald-50 border-emerald-200
+                            {% elif rev.estado == 'observado' %}bg-red-50 border-red-200
+                            {% elif rev.estado == 'faltante' %}bg-orange-50 border-orange-200
+                            {% else %}bg-white border-slate-100
+                            {% endif %}">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-mono text-slate-400">{{ rev.numero_revision }}</span>
+                                        <span class="font-medium">{{ rev.descripcion }}</span>
+                                    </div>
+                                    {% if rev.observacion %}
+                                    <p class="text-xs text-red-600 mt-1">{{ rev.observacion }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded font-medium
+                                        {% if rev.estado == 'aceptado' %}bg-emerald-100 text-emerald-700
+                                        {% elif rev.estado == 'observado' %}bg-red-100 text-red-700
+                                        {% elif rev.estado == 'faltante' %}bg-orange-100 text-orange-700
+                                        {% else %}bg-slate-100 text-slate-600
+                                        {% endif %}">{{ rev.estado }}</span>
+                                </div>
+                            </div>
+                            {% if solicitud.estado == 'en_revision' %}
+                            <!-- Botones grandes para facil toque -->
+                            <div class="flex gap-2 mt-2 pt-2 border-t border-slate-100/50">
+                                <button onclick="marcarRevision('{{ rev.id }}', 'aceptado')"
+                                    class="flex-1 py-1.5 bg-emerald-100 text-emerald-700 rounded text-xs font-medium hover:bg-emerald-200 transition-colors flex items-center justify-center gap-1"
+                                    title="Aceptar">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    Aceptar
+                                </button>
+                                <button onclick="marcarRevisionObservada('{{ rev.id }}')"
+                                    class="flex-1 py-1.5 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-1"
+                                    title="Observar">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                                    Observar
+                                </button>
+                                <button onclick="marcarRevision('{{ rev.id }}', 'faltante')"
+                                    class="flex-1 py-1.5 bg-orange-100 text-orange-700 rounded text-xs font-medium hover:bg-orange-200 transition-colors flex items-center justify-center gap-1"
+                                    title="Faltante">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Faltante
+                                </button>
+                            </div>
+                            {% endif %}
+                            {% if rev.fran_marco %}
+                            <div class="mt-1.5 text-[10px] text-slate-400 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Revisado por Fran
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+
+            {% if not revisiones %}
+            <div class="text-center py-6 text-slate-400">
+                <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <p class="text-sm">Checklist no inicializado</p>
+                <button onclick="inicializarChecklist()" class="text-emerald-600 hover:text-emerald-700 text-xs mt-1">Crear checklist &rarr;</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Agregar Documento -->
+<div id="modal-documento" class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+        <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="font-semibold text-slate-800">Agregar Documento</h3>
+            <button onclick="cerrarModalDocumento()" class="text-slate-400 hover:text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div class="p-4 space-y-3">
+            <div><label class="block text-xs font-medium text-slate-600 mb-1">Nombre del archivo</label><input type="text" id="doc-nombre" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" placeholder="Ej: Memoria_EST_T01.pdf"></div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">Modulo</label><select id="doc-modulo" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"><option value="MDS">MDS</option><option value="EST">EST</option><option value="HAB">HAB</option><option value="URB">URB</option></select></div>
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">Tipo</label><select id="doc-tipo" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"><option value="MEMORIA">MEMORIA</option><option value="PLANO">PLANO</option><option value="INFORME">INFORME</option><option value="PRESUPUESTO">PRESUPUESTO</option><option value="OTRO">OTRO</option></select></div>
+            </div>
+            <div><label class="block text-xs font-medium text-slate-600 mb-1">Tipologia (solo EST)</label><input type="text" id="doc-tipologia" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" placeholder="Ej: T01"></div>
+        </div>
+        <div class="p-4 border-t border-slate-200 flex justify-end gap-2">
+            <button onclick="cerrarModalDocumento()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded transition-colors">Cancelar</button>
+            <button onclick="guardarDocumento()" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Observacion -->
+<div id="modal-observacion" class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
+        <div class="p-4 border-b border-slate-200"><h3 class="font-semibold text-slate-800">Observacion requerida</h3></div>
+        <div class="p-4"><input type="hidden" id="obs-rev-id"><input type="hidden" id="obs-estado"><label class="block text-xs font-medium text-slate-600 mb-1">Motivo de la observacion</label><textarea id="obs-texto" rows="3" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm" placeholder="Ej: Falta plano T03, no coincide tipologia..."></textarea></div>
+        <div class="p-4 border-t border-slate-200 flex justify-end gap-2">
+            <button onclick="cerrarModalObs()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded">Cancelar</button>
+            <button onclick="confirmarObservacionRevision()" class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Estructura de Carpetas R7 -->
+<div id="modal-carpetas" class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+        <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                <h3 class="font-semibold text-slate-800">Estructura de Carpetas</h3>
+            </div>
+            <button onclick="cerrarModalCarpetas()" class="text-slate-400 hover:text-slate-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div class="p-4">
+            <p class="text-xs text-slate-500 mb-3">Ruta base del proyecto:</p>
+            <code id="carpetas-ruta-base" class="block w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded px-3 py-2 mb-4 text-emerald-700 break-all">—</code>
+            <p class="text-xs text-slate-500 mb-2">Subcarpetas:</p>
+            <div id="carpetas-lista" class="space-y-1 max-h-60 overflow-y-auto">
+                <p class="text-sm text-slate-400 text-center py-4">Cargando...</p>
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-200 flex justify-end gap-2">
+            <button onclick="cerrarModalCarpetas()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded transition-colors">Cerrar</button>
+            <button onclick="copiarRutaCarpeta()" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                Copiar ruta
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="notification-area" class="fixed top-16 right-4 z-50 space-y-2"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const solicitudId = '{{ solicitud.id }}';
+
+// ── Estado Solicitud ──
+
+async function cambiarEstadoSolicitud(nuevoEstado) {
+    try {
+        const resp = await fetch(`/api/v1/ing/solicitudes/${solicitudId}/estado`, {
+            method: 'PATCH', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({estado: nuevoEstado}),
+        });
+        if (resp.ok) { mostrarNotif(`Estado cambiado a: ${nuevoEstado}`, 'success'); setTimeout(() => location.reload(), 500); }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+async function crearSiguienteIteracion() {
+    if (!confirm('Crear ING #{{ solicitud.numero_iteracion + 1 }}? Los documentos aceptados se heredaran como "no_aplica" (R6).')) return;
+    try {
+        const resp = await fetch(`/api/v1/ing/solicitudes/${solicitudId}/siguiente-iteracion`, {method: 'POST'});
+        if (resp.ok) { const d = await resp.json(); mostrarNotif(`ING #${d.numero_iteracion} creada`, 'success'); setTimeout(() => window.location.href = `/ing/${d.id}`, 800); }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+// ── Documentos ──
+
+function mostrarModalDocumento() { document.getElementById('modal-documento').classList.remove('hidden'); }
+function cerrarModalDocumento() { document.getElementById('modal-documento').classList.add('hidden'); }
+
+// 1.15: Modal de estructura de carpetas R7
+let rutaCarpetaActual = '';
+
+function cerrarModalCarpetas() { document.getElementById('modal-carpetas').classList.add('hidden'); }
+
+async function verEstructuraCarpetas() {
+    const solicitudId = '{{ solicitud.id }}';
+    try {
+        const resp = await fetch(`/api/v1/ing/solicitudes/${solicitudId}/carpetas`);
+        if (!resp.ok) {
+            mostrarNotif('No se pudo cargar la estructura de carpetas', 'error');
+            return;
+        }
+        const data = await resp.json();
+        rutaCarpetaActual = data.ruta_base || '';
+        document.getElementById('carpetas-ruta-base').textContent = rutaCarpetaActual || '—';
+
+        const lista = document.getElementById('carpetas-lista');
+        if (data.subcarpetas && data.subcarpetas.length > 0) {
+            lista.innerHTML = data.subcarpetas.map(sub => `
+                <div class="flex items-center gap-2 px-3 py-2 rounded-md ${sub.existe ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-50 border border-slate-100 opacity-60'}">
+                    <svg class="w-4 h-4 ${sub.existe ? 'text-emerald-500' : 'text-slate-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                    </svg>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-slate-700">${sub.nombre}</div>
+                        <div class="text-xs text-slate-500 truncate">${sub.descripcion}</div>
+                    </div>
+                    ${sub.existe
+                        ? '<svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+                        : '<span class="text-xs text-slate-400 flex-shrink-0">No creada</span>'}
+                </div>
+            `).join('');
+        } else {
+            lista.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">No hay subcarpetas configuradas</p>';
+        }
+        document.getElementById('modal-carpetas').classList.remove('hidden');
+    } catch (e) {
+        mostrarNotif('Error al cargar carpetas', 'error');
+    }
+}
+
+function copiarRutaCarpeta() {
+    if (rutaCarpetaActual) {
+        navigator.clipboard.writeText(rutaCarpetaActual).then(() => {
+            mostrarNotif('Ruta copiada al portapapeles', 'success');
+        });
+    }
+}
+
+async function guardarDocumento() {
+    const payload = {
+        nombre_archivo: document.getElementById('doc-nombre').value,
+        tipo_documento: document.getElementById('doc-tipo').value,
+        modulo: document.getElementById('doc-modulo').value,
+        tipologia: document.getElementById('doc-tipologia').value || null,
+    };
+    try {
+        const resp = await fetch(`/api/v1/ing/solicitudes/${solicitudId}/documentos`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload),
+        });
+        if (resp.ok) { mostrarNotif('Documento registrado', 'success'); cerrarModalDocumento(); setTimeout(() => location.reload(), 500); }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+async function cambiarEstadoDoc(docId, nuevoEstado) {
+    if (!nuevoEstado) return;
+    if (nuevoEstado === 'observado') {
+        const obs = prompt('Motivo de la observacion:');
+        if (!obs) return;
+        await enviarCambioDoc(docId, nuevoEstado, obs);
+    } else {
+        await enviarCambioDoc(docId, nuevoEstado, null);
+    }
+}
+
+async function enviarCambioDoc(docId, estado, observacion) {
+    try {
+        const resp = await fetch(`/api/v1/ing/documentos/${docId}/estado`, {
+            method: 'PATCH', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({estado, observacion}),
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            let msg = `Documento ${estado}`;
+            // Detectar transicion automatica de la solicitud
+            if (data.solicitud_estado && data.solicitud_estado !== '{{ solicitud.estado }}') {
+                msg += ` — Solicitud: ${data.solicitud_estado}`;
+            }
+            mostrarNotif(msg, 'success');
+            setTimeout(() => location.reload(), 600);
+        }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+// ── Revisiones Cruzadas ──
+
+async function inicializarChecklist() {
+    try {
+        const resp = await fetch(`/api/v1/ing/solicitudes/${solicitudId}/revisiones`, {method: 'POST'});
+        if (resp.ok) { mostrarNotif('Checklist creado (7 revisiones)', 'success'); setTimeout(() => location.reload(), 500); }
+        else if (resp.status === 409) { mostrarNotif('El checklist ya existe. Usa "Reiniciar" para limpiar.', 'warning'); }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+async function reiniciarChecklist() {
+    if (!confirm('Reiniciar TODAS las revisiones cruzadas a "pendiente"?\n\nSe borraran todas las observaciones.')) return;
+    try {
+        const resp = await fetch(`/api/v1/ing/solicitudes/${solicitudId}/reiniciar-revisiones`, {method: 'POST'});
+        if (resp.ok) {
+            const d = await resp.json();
+            let msg = `${d.reiniciadas} revisiones reiniciadas`;
+            // Detectar transicion automatica de la solicitud
+            if (d.solicitud_estado && d.solicitud_estado !== '{{ solicitud.estado }}') {
+                msg += ` — Solicitud: ${d.solicitud_estado}`;
+            }
+            mostrarNotif(msg, 'success');
+            setTimeout(() => location.reload(), 600);
+        }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+async function marcarRevision(revId, estado) {
+    try {
+        const resp = await fetch(`/api/v1/ing/revisiones/${revId}/estado`, {
+            method: 'PATCH', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({estado, observacion: null, fran_marco: true}),
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            let msg = `Revision ${estado}`;
+            // Detectar transicion automatica de la solicitud
+            if (data.solicitud_estado && data.solicitud_estado !== '{{ solicitud.estado }}') {
+                msg += ` — Solicitud: ${data.solicitud_estado}`;
+            }
+            mostrarNotif(msg, 'success');
+            setTimeout(() => location.reload(), 600);
+        }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+function marcarRevisionObservada(revId) {
+    document.getElementById('obs-rev-id').value = revId;
+    document.getElementById('modal-observacion').classList.remove('hidden');
+    setTimeout(() => document.getElementById('obs-texto').focus(), 100);
+}
+function cerrarModalObs() { document.getElementById('modal-observacion').classList.add('hidden'); }
+
+async function confirmarObservacionRevision() {
+    const revId = document.getElementById('obs-rev-id').value;
+    const observacion = document.getElementById('obs-texto').value.trim();
+    if (!observacion) { mostrarNotif('La observacion es obligatoria', 'error'); return; }
+    cerrarModalObs();
+    try {
+        const resp = await fetch(`/api/v1/ing/revisiones/${revId}/estado`, {
+            method: 'PATCH', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({estado: 'observado', observacion, fran_marco: true}),
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            let msg = 'Revision observada';
+            // Detectar transicion automatica de la solicitud
+            if (data.solicitud_estado && data.solicitud_estado !== '{{ solicitud.estado }}') {
+                msg += ` — Solicitud: ${data.solicitud_estado}`;
+            }
+            mostrarNotif(msg, 'success');
+            setTimeout(() => location.reload(), 600);
+        }
+        else { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); }
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+// ── Email ──
+
+async function generarEmail() {
+    try {
+        const resp = await fetch(`/api/v1/ing/solicitudes/${solicitudId}/generar-email`, {method: 'POST'});
+        if (!resp.ok) { const err = await resp.json(); mostrarNotif(err.detail || 'Error', 'error'); return; }
+        const data = await resp.json();
+        mostrarNotif(`Email generado`, 'success');
+        setTimeout(() => {
+            const htmlContent = data.cuerpo_html || '';
+            const tieneHtml = htmlContent.includes('<!DOCTYPE html>');
+            const preview = window.open('', '_blank', 'width=800,height=900');
+            preview.document.open();
+
+            // Escapar texto plano para insertar en textarea HTML
+            const plainEscaped = data.cuerpo.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+            // HTML inyectado: textarea oculto + boton de copiar (todo inline, todo en el mismo documento)
+            const copyHtml = `
+<textarea id="email-plain" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;" readonly>${plainEscaped}</textarea>
+<button id="copy-btn" style="position:fixed;bottom:20px;right:20px;padding:12px 20px;background:#1a5276;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:9999;font-family:system-ui,sans-serif;" onclick="(function(){var t=document.getElementById('email-plain');t.select();var ok=document.execCommand('copy');window.getSelection().removeAllRanges();var b=document.getElementById('copy-btn');b.textContent=ok?'&#9989; Copiado':'&#10060; Error';setTimeout(function(){document.getElementById('copy-btn').textContent='&#128203; Copiar texto plano'},2000);})()">&#128203; Copiar texto plano</button>`;
+
+            if (tieneHtml) {
+                // Insertar antes de </body> en el HTML del email
+                const htmlFinal = htmlContent.replace('</body>', copyHtml + '\n</body>');
+                preview.document.write(htmlFinal);
+            } else {
+                // Fallback: pagina simple con texto plano
+                preview.document.write(`<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Email ING</title></head>
+<body style="margin:0;font-family:monospace;">
+<pre style="padding:20px;white-space:pre-wrap;line-height:1.6;">${plainEscaped}</pre>
+${copyHtml}
+</body></html>`);
+            }
+            preview.document.close();
+        }, 300);
+    } catch(e) { mostrarNotif('Error de red', 'error'); }
+}
+
+// ── Notificaciones ──
+
+function mostrarNotif(mensaje, tipo) {
+    const area = document.getElementById('notification-area');
+    const colores = {success: 'bg-emerald-500', error: 'bg-red-500', warning: 'bg-amber-500'};
+    const c = colores[tipo] || 'bg-slate-500';
+    const n = document.createElement('div');
+    n.className = `${c} text-white px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium transform transition-all`;
+    n.textContent = mensaje;
+    area.appendChild(n);
+    setTimeout(() => n.remove(), 4500);
+}
+</script>
+{% endblock %}

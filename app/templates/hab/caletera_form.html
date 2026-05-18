@@ -1,0 +1,150 @@
+{# Formulario de datos tecnicos para caletera #}
+
+{% if full_page %}{% extends "base.html" %}{% endif %}
+
+{% if full_page %}{% block content %}{% endif %}
+
+<div class="{% if full_page %}max-w-3xl mx-auto{% endif %}">
+    {% if full_page %}
+    <div class="flex items-center gap-3 mb-6">
+        <button class="traza-btn-secondary traza-btn-sm"
+            hx-get="/proyectos/{{ proyecto_id }}"
+            hx-target="#main-content"
+            hx-swap="innerHTML">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Datos Tecnicos - Caletera</h1>
+            <p class="text-sm text-slate-500">Complete los parametros para generar el HAB</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-slate-800">Caletera</h3>
+        <button type="button"
+            onclick="document.getElementById('modal-backdrop').classList.add('hidden'); document.getElementById('modal-container').innerHTML = '';"
+            class="text-slate-400 hover:text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="traza-card">
+        <form id="caletera-form"
+            hx-post="/hab/caletera"
+            hx-target="{% if full_page %}#main-content{% else %}#modal-container{% endif %}"
+            hx-swap="innerHTML"
+            hx-indicator="#caletera-spinner"
+            class="space-y-4">
+
+            <input type="hidden" name="proyecto_id" value="{{ proyecto_id }}">
+
+            <!-- Dimensiones Principales -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="longitud_m" class="traza-label">Longitud Total (m) <span class="text-red-500">*</span></label>
+                    <input type="number" id="longitud_m" name="longitud_m" step="0.01" min="1" max="50000" required
+                        class="traza-input" placeholder="Ej: 1500.00">
+                </div>
+                <div>
+                    <label for="ancho_corona_m" class="traza-label">Ancho de Corona (m) <span class="text-red-500">*</span></label>
+                    <input type="number" id="ancho_corona_m" name="ancho_corona_m" step="0.01" min="1" max="50" required
+                        class="traza-input" placeholder="Ej: 7.30">
+                </div>
+            </div>
+
+            <!-- Tipo de Pavimento + Espesor -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="tipo_pavimento" class="traza-label">Tipo de Pavimento <span class="text-red-500">*</span></label>
+                    <select id="tipo_pavimento" name="tipo_pavimento" required class="traza-select">
+                        <option value="">Seleccione...</option>
+                        <option value="flexible">Flexible (Asfaltico)</option>
+                        <option value="rigido">Rigido (Hormigon)</option>
+                        <option value="semirrigido">Semirrigido</option>
+                        <option value="adosado">Adoquin / Empedrado</option>
+                        <option value="sin_pavimentar">Sin Pavimentar</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="espesor_cm" class="traza-label">Espesor de Capa (cm)</label>
+                    <input type="number" id="espesor_cm" name="espesor_cm" step="0.5" min="1" max="100"
+                        class="traza-input" placeholder="Ej: 15.0">
+                    <p class="text-xs text-slate-400 mt-1">Espesor de la capa de rodadura</p>
+                </div>
+            </div>
+
+            <!-- Pendiente Longitudinal -->
+            <div>
+                <label for="pendiente_longitudinal" class="traza-label">Pendiente Longitudinal (%) <span class="text-red-500">*</span></label>
+                <input type="number" id="pendiente_longitudinal" name="pendiente_longitudinal" step="0.01" min="0" max="15" required
+                    class="traza-input" placeholder="Ej: 3.50">
+                <p class="text-xs text-slate-400 mt-1">Pendiente maxima permitida segun normativa: 8% para caminos secundarios</p>
+            </div>
+
+            <!-- Campos adicionales -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="pendiente_transversal" class="traza-label">Pendiente Transversal (%)</label>
+                    <input type="number" id="pendiente_transversal" name="pendiente_transversal" step="0.1" min="0" max="10"
+                        class="traza-input" placeholder="Ej: 2.0">
+                </div>
+                <div>
+                    <label for="numero_carriles" class="traza-label">Numero de Carriles</label>
+                    <input type="number" id="numero_carriles" name="numero_carriles" step="1" min="1" max="10"
+                        class="traza-input" placeholder="Ej: 2">
+                </div>
+            </div>
+
+            <!-- Señalizacion y Seguridad -->
+            <div>
+                <label for="senalizacion" class="traza-label">Senalizacion Vial</label>
+                <select id="senalizacion" name="senalizacion" class="traza-select">
+                    <option value="">Seleccione...</option>
+                    <option value="completa">Completa (Horizontal + Vertical)</option>
+                    <option value="parcial">Parcial</option>
+                    <option value="solo_vertical">Solo Vertical</option>
+                    <option value="solo_horizontal">Solo Horizontal</option>
+                    <option value="sin_senalizacion">Sin Senalizacion</option>
+                </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button type="button" class="traza-btn-secondary"
+                    {% if full_page %}
+                    hx-get="/proyectos/{{ proyecto_id }}"
+                    hx-target="#main-content"
+                    hx-swap="innerHTML"
+                    {% else %}
+                    onclick="document.getElementById('modal-backdrop').classList.add('hidden'); document.getElementById('modal-container').innerHTML = '';"
+                    {% endif %}>
+                    Cancelar
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="caletera-spinner" class="htmx-indicator flex items-center gap-2 text-sm text-slate-500">
+                        <svg class="spinner w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Generando...
+                    </span>
+                    <button type="submit" class="traza-btn-primary">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Generar HAB
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% if full_page %}{% endblock %}{% endif %}

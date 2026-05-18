@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}Flujo de Ingreso de Proyectos | TRAZA{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-slate-800">Flujo de Ingreso de Proyectos</h1>
+        <p class="text-slate-500 mt-2">Desde la recepcion del email del Coordinador hasta el inicio de R01</p>
+    </div>
+
+    <!-- Diagrama de Flujo -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+            Pipeline ING
+        </h2>
+
+        <div class="flex flex-col lg:flex-row items-stretch gap-4">
+            <!-- Paso 1 -->
+            <div class="flex-1 bg-emerald-50 rounded-lg p-4 border border-emerald-200 relative">
+                <div class="absolute -top-3 -left-3 w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                <h3 class="font-semibold text-emerald-800 mb-2 mt-1">Recepcion</h3>
+                <p class="text-sm text-emerald-700">El Coordinador envia email con documentos (ZIP)</p>
+                <div class="mt-3 text-xs bg-white rounded p-2 font-mono text-emerald-600">
+                    Email: solicitud@serviuohiggins.gob.cl<br>
+                    Asunto: "FSEV - Condominio Los Almendros"<br>
+                    Adjunto: Proyecto.zip
+                </div>
+            </div>
+
+            <!-- Flecha -->
+            <div class="hidden lg:flex items-center text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="flex-1 bg-blue-50 rounded-lg p-4 border border-blue-200 relative">
+                <div class="absolute -top-3 -left-3 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                <h3 class="font-semibold text-blue-800 mb-2 mt-1">Solicitud ING</h3>
+                <p class="text-sm text-blue-700">Fran crea la Solicitud ING #1 en TRAZA</p>
+                <div class="mt-3 text-xs bg-white rounded p-2 font-mono text-blue-600">
+                    Nombre: Condominio Los Almendros<br>
+                    Comuna: Rancagua<br>
+                    Tipo: Habitacional<br>
+                    Fecha: 12/05/2026
+                </div>
+            </div>
+
+            <!-- Flecha -->
+            <div class="hidden lg:flex items-center text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </div>
+
+            <!-- Paso 3 -->
+            <div class="flex-1 bg-amber-50 rounded-lg p-4 border border-amber-200 relative">
+                <div class="absolute -top-3 -left-3 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                <h3 class="font-semibold text-amber-800 mb-2 mt-1">Acronimo + Proyecto</h3>
+                <p class="text-sm text-amber-700">TRAZA genera acronimo y crea el Proyecto</p>
+                <div class="mt-3 text-xs bg-white rounded p-2 font-mono text-amber-700">
+                    Acronimo: <strong>H26RANLA</strong><br>
+                    Proyecto: Condominio Los Almendros<br>
+                    Codigo: H26RANLA
+                </div>
+            </div>
+
+            <!-- Flecha -->
+            <div class="hidden lg:flex items-center text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </div>
+
+            <!-- Paso 4 -->
+            <div class="flex-1 bg-purple-50 rounded-lg p-4 border border-purple-200 relative">
+                <div class="absolute -top-3 -left-3 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
+                <h3 class="font-semibold text-purple-800 mb-2 mt-1">Revision Cruzada</h3>
+                <p class="text-sm text-purple-700">Fran revisa documentos y aplica checklist</p>
+                <div class="mt-3 text-xs bg-white rounded p-2 font-mono text-purple-600">
+                    7 checks: MDS_TOPO, EST_ARQ, HAB_PRES<br>
+                    Documentos: 8 registrados<br>
+                    Estado: 6 aceptados, 2 observados
+                </div>
+            </div>
+
+            <!-- Flecha -->
+            <div class="hidden lg:flex items-center text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </div>
+
+            <!-- Paso 5 -->
+            <div class="flex-1 bg-emerald-50 rounded-lg p-4 border border-emerald-200 relative">
+                <div class="absolute -top-3 -left-3 w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-sm">5</div>
+                <h3 class="font-semibold text-emerald-800 mb-2 mt-1">Aceptacion → R01</h3>
+                <p class="text-sm text-emerald-700">ING aceptada, proyecto listo para R01</p>
+                <div class="mt-3 text-xs bg-white rounded p-2 font-mono text-emerald-600">
+                    Email al Coordinador<br>
+                    R01 desbloqueado<br>
+                    Score: 100% aceptado
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dos columnas: Acronimo + Formulario -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Regla del Acronimo -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                Regla del Acronimo: <code class="bg-slate-100 px-2 py-1 rounded text-sm">[T][YY][CCC][NN]</code>
+            </h2>
+
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
+                    <div class="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-mono font-bold">T</div>
+                    <div>
+                        <p class="font-medium text-slate-800">Tipo de Proyecto (1 letra)</p>
+                        <div class="flex gap-3 mt-1 text-xs">
+                            <span class="px-2 py-1 bg-white rounded border">H = Habitacional</span>
+                            <span class="px-2 py-1 bg-white rounded border">T = Tecnico</span>
+                            <span class="px-2 py-1 bg-white rounded border">D = Dos Fases</span>
+                            <span class="px-2 py-1 bg-white rounded border">O = Otros</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-3 bg-amber-50 rounded-lg">
+                    <div class="w-10 h-10 bg-amber-600 text-white rounded-lg flex items-center justify-center font-mono font-bold">YY</div>
+                    <div>
+                        <p class="font-medium text-slate-800">Ano de creacion (2 digitos)</p>
+                        <p class="text-sm text-slate-500">Ultimos dos digitos del ano: 2026 → <strong>26</strong></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-3 bg-emerald-50 rounded-lg">
+                    <div class="w-10 h-10 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-mono font-bold text-sm">CCC</div>
+                    <div>
+                        <p class="font-medium text-slate-800">Comuna (3 letras)</p>
+                        <p class="text-sm text-slate-500">Codigo de la comuna: Rancagua → <strong>RAN</strong>, San Fernando → <strong>SFE</strong></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-3 bg-purple-50 rounded-lg">
+                    <div class="w-10 h-10 bg-purple-600 text-white rounded-lg flex items-center justify-center font-mono font-bold">NN</div>
+                    <div>
+                        <p class="font-medium text-slate-800">Nombre del proyecto (2 letras)</p>
+                        <p class="text-sm text-slate-500">Iniciales de las 2 primeras palabras significativas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ejemplos -->
+            <div class="mt-6 pt-4 border-t border-slate-200">
+                <h3 class="font-medium text-slate-700 mb-3">Ejemplos</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <span>Habitacional, Rancagua, "Condominio Los Almendros"</span>
+                        <code class="font-mono font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded">H26RANLA</code>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <span>Tecnico, San Fernando, "Hospital Provincial"</span>
+                        <code class="font-mono font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded">T26SFEHP</code>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <span>Dos Fases, Rengo, "Villa Norte"</span>
+                        <code class="font-mono font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded">D26RNGVN</code>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded">
+                        <span>Otros, Santa Cruz, "Centro Comercial"</span>
+                        <code class="font-mono font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded">O26SCZCC</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Las 33 Comunas -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                </svg>
+                33 Comunas de O'Higgins
+            </h2>
+
+            <div class="grid grid-cols-1 gap-1 text-sm">
+                <!-- Provincia Cachapoal -->
+                <div class="mb-2">
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 px-2">Provincia de Cachapoal</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Rancagua</span><code class="font-mono text-xs text-slate-500">RAN</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Codegua</span><code class="font-mono text-xs text-slate-500">COD</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Coinco</span><code class="font-mono text-xs text-slate-500">COI</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Coltauco</span><code class="font-mono text-xs text-slate-500">COL</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Donihue</span><code class="font-mono text-xs text-slate-500">DON</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Graneros</span><code class="font-mono text-xs text-slate-500">GRA</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Las Cabras</span><code class="font-mono text-xs text-slate-500">LCB</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Machali</span><code class="font-mono text-xs text-slate-500">MCH</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Malloa</span><code class="font-mono text-xs text-slate-500">MLL</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Mostazal</span><code class="font-mono text-xs text-slate-500">MST</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Olivar</span><code class="font-mono text-xs text-slate-500">OLI</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Peumo</span><code class="font-mono text-xs text-slate-500">PEU</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Pichidegua</span><code class="font-mono text-xs text-slate-500">PCH</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Quinta de Tilcoco</span><code class="font-mono text-xs text-slate-500">QTC</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Rengo</span><code class="font-mono text-xs text-slate-500">RNG</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Requinoa</span><code class="font-mono text-xs text-slate-500">REQ</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded col-span-2"><span>San Vicente de Tagua Tagua</span><code class="font-mono text-xs text-slate-500">SVT</code></div>
+                    </div>
+                </div>
+
+                <!-- Provincia Cardenal Caro -->
+                <div class="mb-2">
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 px-2">Provincia de Cardenal Caro</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>La Estrella</span><code class="font-mono text-xs text-slate-500">LES</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Litueche</span><code class="font-mono text-xs text-slate-500">LIT</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Marchihue</span><code class="font-mono text-xs text-slate-500">MRG</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Navidad</span><code class="font-mono text-xs text-slate-500">NAV</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Paredones</span><code class="font-mono text-xs text-slate-500">PAR</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Pichilemu</span><code class="font-mono text-xs text-slate-500">PIC</code></div>
+                    </div>
+                </div>
+
+                <!-- Provincia Colchagua -->
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 px-2">Provincia de Colchagua</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Chepica</span><code class="font-mono text-xs text-slate-500">CHP</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Chimbarongo</span><code class="font-mono text-xs text-slate-500">CHB</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Lolol</span><code class="font-mono text-xs text-slate-500">LOL</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Nancagua</span><code class="font-mono text-xs text-slate-500">NCG</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Palmilla</span><code class="font-mono text-xs text-slate-500">PLM</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Peralillo</span><code class="font-mono text-xs text-slate-500">PER</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Placilla</span><code class="font-mono text-xs text-slate-500">PLC</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Pumanque</span><code class="font-mono text-xs text-slate-500">PMQ</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>San Fernando</span><code class="font-mono text-xs text-slate-500">SFE</code></div>
+                        <div class="flex justify-between p-2 bg-slate-50 rounded"><span>Santa Cruz</span><code class="font-mono text-xs text-slate-500">SCZ</code></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boton para crear Solicitud -->
+    <div class="text-center pt-4">
+        <a href="/ing/nueva" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Crear Nueva Solicitud ING
+        </a>
+    </div>
+
+</div>
+{% endblock %}

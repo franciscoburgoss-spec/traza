@@ -1,0 +1,252 @@
+{# Preview del HAB de Caletera #}
+
+{% if full_page %}{% extends "base.html" %}{% endif %}
+
+{% if full_page %}{% block content %}{% endif %}
+
+<div class="max-w-5xl mx-auto">
+    {% if full_page %}
+    <div class="flex items-center gap-3 mb-6 no-print">
+        <button class="traza-btn-secondary traza-btn-sm"
+            hx-get="/proyectos/{{ proyecto_id }}"
+            hx-target="#main-content"
+            hx-swap="innerHTML">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <div class="flex-1">
+            <h1 class="text-2xl font-bold text-slate-800">HAB - Caletera</h1>
+            <p class="text-sm text-slate-500">Hoja de Analisis de Buenas Practicas</p>
+        </div>
+        <div class="flex items-center gap-2 no-print">
+            <button onclick="window.print()" class="traza-btn-secondary traza-btn-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Imprimir
+            </button>
+            <a href="/hab/caletera/{{ hab_id }}/pdf" class="traza-btn-primary traza-btn-sm" target="_blank">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                PDF
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Reporte HAB -->
+    <div class="hab-report" id="hab-caletera-content">
+
+        <!-- Header del Reporte -->
+        <div class="hab-report-header">
+            <h1>Hoja de Analisis de Buenas Practicas</h1>
+            <h2>Caletera - {{ datos.tipo_pavimento|replace('_', ' ')|title }}</h2>
+            <p class="text-sm text-slate-500 mt-2">
+                Proyecto: {{ proyecto_codigo or 'N/A' }} |
+                Fecha: {{ fecha_generacion or 'N/A' }} |
+                ID: {{ hab_id or 'N/A' }}
+            </p>
+        </div>
+
+        <!-- 1. Datos Generales -->
+        <div class="hab-section">
+            <h3 class="hab-section-title">1. Datos Generales</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Longitud Total</span>
+                    <span class="hab-data-value">{{ datos.longitud_m }} m</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Ancho de Corona</span>
+                    <span class="hab-data-value">{{ datos.ancho_corona_m }} m</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Tipo de Pavimento</span>
+                    <span class="hab-data-value">{{ datos.tipo_pavimento|replace('_', ' ')|title }}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Espesor de Capa</span>
+                    <span class="hab-data-value">{{ datos.espesor_cm or 'No especificado' }} {% if datos.espesor_cm %}cm{% endif %}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Pendiente Longitudinal</span>
+                    <span class="hab-data-value">{{ datos.pendiente_longitudinal }} %</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Pendiente Transversal</span>
+                    <span class="hab-data-value">{{ datos.pendiente_transversal or 'No especificado' }} {% if datos.pendiente_transversal %}%{% endif %}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Numero de Carriles</span>
+                    <span class="hab-data-value">{{ datos.numero_carriles or 'No especificado' }}</span>
+                </div>
+                <div class="hab-data-row">
+                    <span class="hab-data-label">Senalizacion Vial</span>
+                    <span class="hab-data-value">{{ datos.senalizacion|replace('_', ' ')|title if datos.senalizacion else 'No especificado' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Verificaciones Técnicas -->
+        <div class="hab-section">
+            <h3 class="hab-section-title">2. Verificaciones Técnicas</h3>
+
+            <!-- Pendiente Longitudinal -->
+            <div class="hab-compliance-row">
+                {% if datos.pendiente_longitudinal|float <= 8.0 %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Pendiente Longitudinal</p>
+                        <p class="text-xs text-slate-500">{{ datos.pendiente_longitudinal }}% <= 8% (max. caminos secundarios)</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Pendiente Longitudinal - EXCEDE LIMITE</p>
+                        <p class="text-xs text-red-500">{{ datos.pendiente_longitudinal }}% > 8% maximo permitido</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pendiente Transversal -->
+            <div class="hab-compliance-row">
+                {% if datos.pendiente_transversal and datos.pendiente_transversal|float >= 1.5 and datos.pendiente_transversal|float <= 4.0 %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Pendiente Transversal</p>
+                        <p class="text-xs text-slate-500">{{ datos.pendiente_transversal }}% (rango aceptable 1.5% - 4%)</p>
+                    </div>
+                {% elif datos.pendiente_transversal %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Pendiente Transversal - FUERA DE RANGO</p>
+                        <p class="text-xs text-red-500">{{ datos.pendiente_transversal }}% (rango 1.5% - 4%)</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-amber-700">Pendiente Transversal - NO ESPECIFICADA</p>
+                        <p class="text-xs text-amber-500">Se requiere para verificacion completa</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Ancho de Corona -->
+            <div class="hab-compliance-row">
+                {% if datos.ancho_corona_m|float >= 6.0 %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Ancho de Corona</p>
+                        <p class="text-xs text-slate-500">{{ datos.ancho_corona_m }} m >= 6.0 m (min. caminos secundarios)</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Ancho de Corona - INSUFICIENTE</p>
+                        <p class="text-xs text-red-500">{{ datos.ancho_corona_m }} m < 6.0 m minimo</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Espesor de Pavimento -->
+            <div class="hab-compliance-row">
+                {% if datos.espesor_cm and datos.espesor_cm|float >= 10.0 %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Espesor de Capa de Rodadura</p>
+                        <p class="text-xs text-slate-500">{{ datos.espesor_cm }} cm >= 10 cm (minimo recomendado)</p>
+                    </div>
+                {% elif datos.espesor_cm %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-red-700">Espesor de Capa - INSUFICIENTE</p>
+                        <p class="text-xs text-red-500">{{ datos.espesor_cm }} cm < 10 cm minimo</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-amber-700">Espesor de Capa - NO ESPECIFICADO</p>
+                        <p class="text-xs text-amber-500">Se requiere para verificacion completa</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Senalizacion -->
+            <div class="hab-compliance-row">
+                {% if datos.senalizacion and datos.senalizacion != 'sin_senalizacion' %}
+                    <svg class="hab-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">Senalizacion Vial</p>
+                        <p class="text-xs text-slate-500">{{ datos.senalizacion|replace('_', ' ')|title }} - Instalada</p>
+                    </div>
+                {% else %}
+                    <svg class="hab-cross-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-amber-700">Senalizacion Vial - NO ESPECIFICADA</p>
+                        <p class="text-xs text-amber-500">Senalizacion recomendada para seguridad vial</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 3. Conclusion -->
+        <div class="hab-section">
+            <h3 class="hab-section-title">3. Conclusion y Recomendaciones</h3>
+            <div class="bg-slate-50 p-4 rounded-lg text-sm text-slate-700 leading-relaxed">
+                {% if resultados and resultados.conclusion %}
+                    {{ resultados.conclusion }}
+                {% else %}
+                    <p>El analisis de la caletera con pavimento
+                    <strong>{{ datos.tipo_pavimento|replace('_', ' ')|title }}</strong>,
+                    longitud {{ datos.longitud_m }} m y ancho de corona {{ datos.ancho_corona_m }} m
+                    debe completarse con las verificaciones tecnicas correspondientes.</p>
+                    <p class="mt-2">Se recomienda verificar:</p>
+                    <ul class="list-disc ml-5 mt-1 space-y-0.5">
+                        <li>Pendientes longitudinal y transversal segun normativa</li>
+                        <li>Espesor estructural del pavimento segun trafico diseñado</li>
+                        <li>Sistema de drenaje superficial</li>
+                        <li>Senalizacion y seguridad vial</li>
+                        <li>Seccion tipica de la plataforma</li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 pt-4 border-t border-slate-200 text-center text-xs text-slate-400">
+            <p>TRAZA - Sistema de Evaluacion Tecnica de Proyectos de Infraestructura</p>
+            <p class="mt-1">Documento generado automaticamente - Session: {{ session_id or 'N/A' }}</p>
+        </div>
+
+    </div>
+</div>
+
+{% if full_page %}{% endblock %}{% endif %}

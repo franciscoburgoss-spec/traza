@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{% if proyecto %}Editar {{ proyecto.codigo }}{% else %}Nuevo Proyecto{% endif %} - TRAZA{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+        <button class="traza-btn-secondary traza-btn-sm"
+            hx-get="{% if proyecto %}/proyectos/{{ proyecto.id }}{% else %}/proyectos{% endif %}"
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-push-url="true">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">
+                {% if proyecto %}Editar Proyecto{% else %}Nuevo Proyecto{% endif %}
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                {% if proyecto %}Modificando {{ proyecto.codigo }}{% else %}Complete los datos del proyecto{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="traza-card">
+        <form id="proyecto-form"
+            {% if proyecto %}
+            hx-put="/proyectos/{{ proyecto.id }}"
+            {% else %}
+            hx-post="/proyectos"
+            {% endif %}
+            hx-target="#main-content"
+            hx-swap="innerHTML"
+            hx-indicator="#form-spinner"
+            class="space-y-5">
+
+            <!-- Codigo -->
+            <div>
+                <label for="codigo" class="traza-label">
+                    Codigo <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="codigo" name="codigo" required
+                    value="{{ proyecto.codigo if proyecto else '' }}"
+                    placeholder="Ej: TRZ-2024-001"
+                    class="traza-input"
+                    minlength="3" maxlength="50"
+                    {% if proyecto %}disabled{% endif %}>
+                {% if proyecto %}
+                    <input type="hidden" name="codigo" value="{{ proyecto.codigo }}">
+                {% endif %}
+                <p class="text-xs text-slate-400 mt-1">Codigo unico del proyecto (3-50 caracteres)</p>
+            </div>
+
+            <!-- Nombre -->
+            <div>
+                <label for="nombre" class="traza-label">
+                    Nombre <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="nombre" name="nombre" required
+                    value="{{ proyecto.nombre if proyecto else '' }}"
+                    placeholder="Nombre descriptivo del proyecto"
+                    class="traza-input"
+                    minlength="5" maxlength="200">
+            </div>
+
+            <!-- Grid: Tipo + Comuna -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="tipo_proyecto" class="traza-label">
+                        Tipo de Proyecto <span class="text-red-500">*</span>
+                    </label>
+                    <select id="tipo_proyecto" name="tipo_proyecto" required class="traza-select">
+                        <option value="">Seleccione...</option>
+                        <option value="Megaproyecto" {% if proyecto and proyecto.tipo_proyecto == 'Megaproyecto' %}selected{% endif %}>Megaproyecto</option>
+                        <option value="CNT" {% if proyecto and proyecto.tipo_proyecto == 'CNT' %}selected{% endif %}>CNT - Carretera Nacional Transversal</option>
+                        <option value="CSP" {% if proyecto and proyecto.tipo_proyecto == 'CSP' %}selected{% endif %}>CSP - Carretera Secundaria Provincial</option>
+                        <option value="DP" {% if proyecto and proyecto.tipo_proyecto == 'DP' %}selected{% endif %}>DP - Departamental</option>
+                        <option value="PC" {% if proyecto and proyecto.tipo_proyecto == 'PC' %}selected{% endif %}>PC - Proyecto Complementario</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="ref_comuna" class="traza-label">Comuna</label>
+                    <input type="text" id="ref_comuna" name="ref_comuna"
+                        value="{{ proyecto.ref_comuna if proyecto else '' }}"
+                        placeholder="Ej: Santiago"
+                        class="traza-input"
+                        maxlength="100">
+                </div>
+            </div>
+
+            <!-- Grid: Zona Sismica + Tipo Suelo -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label for="ref_zona_sismica" class="traza-label">
+                        Zona Sismica <span class="text-red-500">*</span>
+                    </label>
+                    <select id="ref_zona_sismica" name="ref_zona_sismica" required class="traza-select">
+                        <option value="">Seleccione...</option>
+                        <option value="1" {% if proyecto and proyecto.ref_zona_sismica == 1 %}selected{% endif %}>Zona 1 (Baja)</option>
+                        <option value="2" {% if proyecto and proyecto.ref_zona_sismica == 2 %}selected{% endif %}>Zona 2 (Media)</option>
+                        <option value="3" {% if proyecto and proyecto.ref_zona_sismica == 3 %}selected{% endif %}>Zona 3 (Alta)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="ref_tipo_suelo" class="traza-label">
+                        Tipo de Suelo <span class="text-red-500">*</span>
+                    </label>
+                    <select id="ref_tipo_suelo" name="ref_tipo_suelo" required class="traza-select">
+                        <option value="">Seleccione...</option>
+                        <option value="I" {% if proyecto and proyecto.ref_tipo_suelo == 'I' %}selected{% endif %}>Tipo I (Roca)</option>
+                        <option value="II" {% if proyecto and proyecto.ref_tipo_suelo == 'II' %}selected{% endif %}>Tipo II (Transicion)</option>
+                        <option value="III" {% if proyecto and proyecto.ref_tipo_suelo == 'III' %}selected{% endif %}>Tipo III (Blando)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="ref_Ao" class="traza-label">
+                        Ao (Aceleracion sismica)
+                    </label>
+                    <input type="number" id="ref_Ao" name="ref_Ao" step="0.01" min="0.05" max="1.0"
+                        value="{{ proyecto.ref_Ao if proyecto else '' }}"
+                        placeholder="0.30"
+                        class="traza-input">
+                    <p class="text-xs text-slate-400 mt-1">Valor entre 0.05 y 1.0 g</p>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button type="button" class="traza-btn-secondary"
+                    hx-get="{% if proyecto %}/proyectos/{{ proyecto.id }}{% else %}/proyectos{% endif %}"
+                    hx-target="#main-content"
+                    hx-swap="innerHTML"
+                    hx-push-url="true">
+                    Cancelar
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="form-spinner" class="htmx-indicator flex items-center gap-2 text-sm text-slate-500">
+                        <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Guardando...
+                    </span>
+                    <button type="submit" class="traza-btn-primary">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Guardar Proyecto
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}

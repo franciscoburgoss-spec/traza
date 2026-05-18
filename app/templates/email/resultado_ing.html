@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado ING — {{ proyecto.nombre }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%);
+            color: white;
+            padding: 32px 40px;
+        }
+        .header-top {
+            display: table;
+            width: 100%;
+        }
+        .header-left {
+            display: table-cell;
+            vertical-align: middle;
+        }
+        .header-right {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: right;
+        }
+        .org-name {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+        .system-name {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        .badge-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
+        }
+        /* Project Info */
+        .project-info {
+            padding: 28px 40px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .project-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a5276;
+            margin-bottom: 16px;
+        }
+        .project-meta {
+            display: table;
+            width: 100%;
+        }
+        .project-meta-row {
+            display: table-row;
+        }
+        .project-meta-cell {
+            display: table-cell;
+            padding: 4px 16px 4px 0;
+            font-size: 13px;
+        }
+        .project-meta-label {
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .project-meta-value {
+            color: #333;
+            font-weight: 600;
+        }
+        /* Content */
+        .content {
+            padding: 28px 40px;
+        }
+        .intro {
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        /* Stats Bar */
+        .stats-bar {
+            display: table;
+            width: 100%;
+            margin-bottom: 28px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .stat-box {
+            display: table-cell;
+            text-align: center;
+            padding: 18px 12px;
+            width: 33.33%;
+        }
+        .stat-box.aceptados { background: #eafaf1; }
+        .stat-box.observados { background: #fef9e7; }
+        .stat-box.faltantes { background: #fdedec; }
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .stat-box.aceptados .stat-number { color: #27ae60; }
+        .stat-box.observados .stat-number { color: #f39c12; }
+        .stat-box.faltantes .stat-number { color: #e74c3c; }
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 6px;
+            color: #666;
+        }
+        /* Sections */
+        .section {
+            margin-bottom: 24px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        .section-header {
+            padding: 14px 20px;
+            font-weight: 700;
+            font-size: 14px;
+            display: table;
+            width: 100%;
+        }
+        .section-header-left {
+            display: table-cell;
+        }
+        .section-header-right {
+            display: table-cell;
+            text-align: right;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+        .section-aceptados .section-header { background: #d5f5e3; color: #1e8449; }
+        .section-observados .section-header { background: #fdebd0; color: #b9770e; }
+        .section-faltantes .section-header { background: #fadbd8; color: #c0392b; }
+        .section-body {
+            padding: 8px 0;
+        }
+        .doc-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 13px;
+        }
+        .doc-item:last-child { border-bottom: none; }
+        .doc-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .doc-meta {
+            color: #888;
+            font-size: 12px;
+        }
+        .doc-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 6px;
+        }
+        .doc-tag-modulo { background: #eef; color: #557; }
+        .doc-tag-tipo { background: #f5f5f5; color: #666; }
+        .doc-observacion {
+            margin-top: 6px;
+            padding: 8px 12px;
+            background: #fffbf0;
+            border-left: 3px solid #f39c12;
+            border-radius: 0 4px 4px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .doc-observacion-faltante {
+            background: #fff5f5;
+            border-left-color: #e74c3c;
+        }
+        /* Empty State */
+        .empty-state {
+            padding: 24px 20px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+        .empty-state-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        /* Footer */
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-top: 1px solid #e8e8e8;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+        .footer-logo {
+            font-weight: 700;
+            color: #1a5276;
+            margin-bottom: 8px;
+        }
+        .footer-meta {
+            font-size: 11px;
+        }
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header { padding: 24px 20px; }
+            .project-info { padding: 20px; }
+            .content { padding: 20px; }
+            .footer { padding: 16px 20px; }
+            .header-left, .header-right {
+                display: block;
+                text-align: left;
+            }
+            .header-right { margin-top: 12px; }
+            .project-meta-cell {
+                display: block;
+                padding: 4px 0;
+            }
+            .stat-box { padding: 14px 8px; }
+            .stat-number { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <div class="header-left">
+                    <div class="org-name">SERVIU O'Higgins</div>
+                    <div class="system-name">TRAZA</div>
+                </div>
+                <div class="header-right">
+                    <div class="badge-label">Solicitud</div>
+                    <div class="badge">ING #{{ proyecto.iteracion }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Info -->
+        <div class="project-info">
+            <div class="project-title">{{ proyecto.nombre }}</div>
+            <div class="project-meta">
+                <div class="project-meta-row">
+                    <div class="project-meta-cell">
+                        <div class="project-meta-label">Empresa</div>
+                        <div class="project-meta-value">{{ proyecto.empresa }}</div>
+                    </div>
+                    <div class="project-meta-cell">
+                        <div class="project-meta-label">Acrónimo</div>
+                        <div class="project-meta-value">{{ proyecto.acronimo }}</div>
+                    </div>
+                </div>
+                <div class="project-meta-row">
+                    <div class="project-meta-cell">
+                        <div class="project-meta-label">Comuna</div>
+                        <div class="project-meta-value">{{ proyecto.comuna }}</div>
+                    </div>
+                    <div class="project-meta-cell">
+                        <div class="project-meta-label">Tipo</div>
+                        <div class="project-meta-value">{{ proyecto.tipo }}</div>
+                    </div>
+                    <div class="project-meta-cell">
+                        <div class="project-meta-label">Módulos</div>
+                        <div class="project-meta-value">{{ proyecto.modulos }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="intro">
+                Estimado Coordinador,<br><br>
+                Se adjunta el resultado de la verificación ING para el proyecto <strong>{{ proyecto.nombre }}</strong>.
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-box aceptados">
+                    <div class="stat-number">{{ stats.aceptados }}</div>
+                    <div class="stat-label">Aceptados</div>
+                </div>
+                <div class="stat-box observados">
+                    <div class="stat-number">{{ stats.observados }}</div>
+                    <div class="stat-label">Observados</div>
+                </div>
+                <div class="stat-box faltantes">
+                    <div class="stat-number">{{ stats.faltantes }}</div>
+                    <div class="stat-label">Faltantes</div>
+                </div>
+            </div>
+
+            <!-- Aceptados -->
+            {% if aceptados %}
+            <div class="section section-aceptados">
+                <div class="section-header">
+                    <div class="section-header-left">✓ Documentos Aceptados</div>
+                    <div class="section-header-right">{{ aceptados|length }} documento(s)</div>
+                </div>
+                <div class="section-body">
+                    {% for doc in aceptados %}
+                    <div class="doc-item">
+                        <div class="doc-name">{{ doc.nombre }}</div>
+                        <div class="doc-meta">
+                            <span class="doc-tag doc-tag-modulo">{{ doc.modulo }}</span>
+                            <span class="doc-tag doc-tag-tipo">{{ doc.tipo }}</span>
+                            {% if doc.tipologia %}
+                            <span class="doc-tag doc-tag-tipo">{{ doc.tipologia }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Observados -->
+            {% if observados %}
+            <div class="section section-observados">
+                <div class="section-header">
+                    <div class="section-header-left">⚠ Documentos Observados</div>
+                    <div class="section-header-right">{{ observados|length }} documento(s)</div>
+                </div>
+                <div class="section-body">
+                    {% for doc in observados %}
+                    <div class="doc-item">
+                        <div class="doc-name">{{ doc.nombre }}</div>
+                        <div class="doc-meta">
+                            <span class="doc-tag doc-tag-modulo">{{ doc.modulo }}</span>
+                            <span class="doc-tag doc-tag-tipo">{{ doc.tipo }}</span>
+                            {% if doc.tipologia %}
+                            <span class="doc-tag doc-tag-tipo">{{ doc.tipologia }}</span>
+                            {% endif %}
+                        </div>
+                        {% if doc.observacion %}
+                        <div class="doc-observacion">
+                            <strong>Motivo:</strong> {{ doc.observacion }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Faltantes -->
+            {% if faltantes %}
+            <div class="section section-faltantes">
+                <div class="section-header">
+                    <div class="section-header-left">✗ Documentos Faltantes</div>
+                    <div class="section-header-right">{{ faltantes|length }} documento(s)</div>
+                </div>
+                <div class="section-body">
+                    {% for doc in faltantes %}
+                    <div class="doc-item">
+                        <div class="doc-name">{{ doc.nombre }}</div>
+                        <div class="doc-meta">
+                            <span class="doc-tag doc-tag-modulo">{{ doc.modulo }}</span>
+                            <span class="doc-tag doc-tag-tipo">{{ doc.tipo }}</span>
+                            {% if doc.tipologia %}
+                            <span class="doc-tag doc-tag-tipo">{{ doc.tipologia }}</span>
+                            {% endif %}
+                        </div>
+                        {% if doc.observacion %}
+                        <div class="doc-observacion doc-observacion-faltante">
+                            <strong>Nota:</strong> {{ doc.observacion }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if not aceptados and not observados and not faltantes %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                No hay documentos registrados para esta solicitud.<br>
+                Agregue documentos antes de generar el email.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-logo">TRAZA — Sistema de Trazabilidad Normativa</div>
+            <div>SERVIU O'Higgins — Revisión Estructural FSEV</div>
+            <div class="footer-meta">
+                Generado el {{ fecha_generacion }} · Solicitud ING #{{ proyecto.iteracion }} · {{ proyecto.session_id }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
